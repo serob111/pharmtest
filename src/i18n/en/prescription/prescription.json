@@ -1,0 +1,42 @@
+{
+    "deactivate-prescription": "Deactivate Prescription",
+    "prescriptions":"Prescriptions",
+    "activity-log": "Activity Log",
+    "select-model": "Select model(es)",
+    "select-type": "Select Prescription Type(s)",
+    "by-model": "By Model",
+    "by-manufacturer": "By Manufacturer",
+    "by-status": "By Status",
+    "select-status": "Select Status(es)",
+    "last-updated": "Last updated",
+    "prescription-directory": "Prescriptions",
+    "completed": "Completed",
+    "search": "Search",
+    "check-different-keywoard": "We couldn’t find any results matching your search. Please check the spelling or try a different keyword.",
+    "not-prescription-found": "No prescriptions found",
+    "check-different-filter": "There are no prescriptions in the list. You can add a new prescription or adjust your filters to view results.",
+    "not-prescription-filter-found": "No prescriptions yet",
+    "filters": "Filters",
+    "table": {
+        "header": {
+            "id": "HIS Prescription ID",
+            "created": "Created Date",
+            "his-created": "HIS Created Date",
+            "department": "Location",
+            "created_stamp": "Date Added",
+            "status": "Internal Status",
+            "his-status":"HIS Status",
+            "stock-id": "HIS Hospital Pharmacy Stock ID"
+        }
+    },
+    "id":"ID",
+    "med-id":"Medicine ID",
+    "date":"Appointment Date",
+    "name":"Medicine description",
+    "dosage":"Dosage",
+    "dosage-unit":"Dosage Unit",
+    "amount":"Amount",
+    "unit":"Unit",
+    "presc-details":"Prescription Details"
+
+}

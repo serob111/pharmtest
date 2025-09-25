@@ -1,0 +1,17 @@
+{
+    "users": "Users",
+    "email": "Email",
+    "phone-number": "Phone number",
+    "enter-first-name": "Enter First Name",
+    "enter-last-name": "Enter Last Name",
+    "first-name": "First Name",
+    "last-name": "Last name",
+    "enter-email": "Enter email (used for system login)",
+    "enter-phone-number": "Enter phone number",
+    "role": "Role",
+    "select-role": "Select Role",
+    "create-user": "Create New User",
+    "create": "Create User",
+    "cancel": "Cancel",
+    "generate-password": "Generate password automatically"
+}

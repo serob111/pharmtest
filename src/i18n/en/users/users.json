@@ -1,0 +1,13 @@
+{
+    "users": "Users",
+    "table": {
+        "header": {
+            "fullName": "Name",
+            "email": "Email",
+            "phone": "Phone Number",
+            "role": "Role",
+            "status": "Status",
+            "creating": "Creating"
+        }
+    }
+}

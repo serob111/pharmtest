@@ -1,0 +1,41 @@
+{
+    "deactivate-prescription": "Отключить рецепт",
+    "prescriptions": "Рецепты",
+    "activity-log": "Журнал активности",
+    "select-model": "Выберите модель(и)",
+    "select-type": "Выберите тип(ы) рецепта",
+    "by-model": "По модели",
+    "by-manufacturer": "По производителю",
+    "by-status": "По статусу",
+    "select-status": "Выберите статус(ы)",
+    "last-updated": "Последнее обновление",
+    "prescription-directory": "Рецепты",
+    "completed": "Завершено",
+    "search": "Поиск",
+    "check-different-keywoard": "Не удалось найти результаты, соответствующие вашему запросу. Проверьте орфографию или попробуйте другой ключевой запрос.",
+    "not-prescription-found": "Рецепты не найдены",
+    "check-different-filter": "В списке нет рецептов. Вы можете добавить новый рецепт или изменить фильтры для отображения результатов.",
+    "not-prescription-filter-found": "Рецептов пока нет",
+    "filters": "Фильтры",
+    "table": {
+      "header": {
+        "id": "ID рецепта",
+        "created": "Дата создания",
+        "his-created": "Дата создания в HIS",
+        "department": "Отдел",
+        "created_stamp": "Дата добавления",
+        "status": "Статус",
+        "his-status": "Статус HIS",
+        "stock-id": "ID запаса аптечного склада HIS"
+      }
+    },
+    "id": "ID",
+    "category": "Категория",
+    "date": "Дата",
+    "name": "Название",
+    "dosage": "Дозировка",
+    "dosage-unit": "Единица дозировки",
+    "amount": "Количество",
+    "unit": "Единица измерения",
+    "presc-details": "Детали рецепта"
+  }

@@ -1,0 +1,80 @@
+{
+  "welcome": "Добро пожаловать в Аптеку",
+  "description": "Описания",
+  "login-title": "Вход в систему",
+  "login-subtitle": "Пожалуйста, войдите в аккаунт, чтобы продолжить.",
+  "enter-email": "Введите вашу электронную почту",
+  "enter-password": "Введите ваш пароль",
+  "required-field": "Обязательное поле",
+  "password": "Пароль",
+  "forgot-password": "Забыли пароль",
+  "login": "Войти",
+  "disclaimer": "Система предназначена только для авторизованных пользователей. Вход означает согласие с",
+  "termsLink": "Условиями использования и Политикой конфиденциальности AptekaOne.",
+  "wrong-credentials": "Неверная почта или пароль",
+  "confirm": "Подтвердить вход",
+  "confirm-subtitle": "Пожалуйста, введите код из приложения Google Authenticator",
+  "continue": "Продолжить",
+  "reset-password-title": "Сброс пароля",
+  "reset-password-subtitle": "Введите свой адрес электронной почты, и мы вышлем вам ссылку для сброса пароля",
+  "back-to-login": "Вернуться ко входу",
+  "send-reset-link": "Отправить ссылку для сброса",
+  "check-email": "Проверьте почту",
+  "reset-password-email-sent": "Мы отправили ссылку для сброса пароля на {{email}}. Следуйте инструкциям в письме, чтобы создать новый пароль.",
+  "send-again": "Отправить повторно",
+  "not-get-message": "Не получили письмо?",
+  "create-password": "Создайте новый пароль",
+  "new-password-requirements": "Пароль должен содержать не менее 8 символов, включая заглавные и строчные буквы, цифру и спецсимвол",
+  "new-password": "Новый пароль",
+  "confirm-password": "Подтверждение пароля",
+  "repeat-password": "Повторите пароль",
+  "enter-new-password": "Введите пароль",
+  "save-new-password": "Сохранить новый пароль",
+  "not-match": "Пароли не совпадают",
+  "passwordValidation": {
+    "minLength": "Минимум 8 символов",
+    "uppercaseLowercase": "Заглавные и строчные буквы",
+    "numberRequired": "Минимум одна цифра",
+    "specialCharRequired": "Хотя бы один спецсимвол (например, !?%$@#&)"
+  },
+  "password-updated": "Пароль обновлён",
+  "password-updated-subtitle": "Ваш пароль был успешно изменён. Теперь вы можете войти в систему с новым паролем.",
+  "sideBar": {
+    "items": {
+      "orders": "Заказы",
+      "prescriptions": "Рецепты",
+      "med-directory": "Справочник медикаментов",
+      "equipment": "Оборудование",
+      "users": "Пользователи",
+      "activity-log": "Журнал активности"
+    }
+  },
+  "common": {
+    "notProvidedYet": "Пока не указано"
+  },
+  "profile": {
+    "account-settings": "Account Settings",
+    "manage-account": "Manage your account",
+    "change-language": "Change Language",
+    "logout": "Sign Out"
+  },
+  "update-profile": {
+    "update-name": "Обновить полное имя",
+    "update-name-description": "Пожалуйста, введите ваше имя и фамилию так, как вы хотите, чтобы они отображались в системе.",
+    "save": "Сохранить",
+    "verify": "Подтвердить",
+    "cancel": "Отмена",
+    "update-phone": "Обновить номер телефона",
+    "update-role": "Обновить роль",
+    "update-role-description": "Выберите подходящую роль пользователя из списка.",
+    "6-digit": "Введите 6-значный код",
+    "update-phone-description": "Введите ваш текущий номер телефона. Он будет использоваться для внутренней связи при необходимости.",
+    "update-password": "Изменить пароль",
+    "new-password": "Создать новый пароль",
+    "confirm-new-password": "Подтвердите новый пароль",
+    "update-password-description": "Установите надёжный пароль, чтобы защитить свою учётную запись. Убедитесь, что его знаете только вы.",
+    "2fa": "Двухфакторная аутентификация",
+    "2fa-description": "Отсканируйте QR-код с помощью приложения Google Authenticator. Затем введите 6-значный код, сгенерированный приложением, чтобы завершить настройку."
+  },
+  "error": "Ошибка загрузки"
+}
