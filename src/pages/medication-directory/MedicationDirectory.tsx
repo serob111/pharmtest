@@ -18,10 +18,12 @@ export default function MedicationDirectory() {
     offset,
     medsList,
     medsLoading,
+    selectedMed,
     setLimit,
     setSelectedMed,
     setOffset,
-    updateFilters
+    updateFilters,
+    clearSelection
   } = useMeds();
   
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -89,6 +91,16 @@ export default function MedicationDirectory() {
     setUseInKiro(newUseInKiro);
     updateFilters({ useInKiro: newUseInKiro });
   }
+
+  const handleClosePanel = () => {
+    setIsPanelOpen(false);
+    // Clear selection when closing panel
+    setTimeout(() => {
+      if (!isPanelOpen) {
+        clearSelection();
+      }
+    }, 300); // Wait for animation to complete
+  };
 
   useEffect(() => {
     updateFilters({ 
@@ -180,10 +192,7 @@ export default function MedicationDirectory() {
             ${isPanelOpen ? 'translate-x-0' : 'translate-x-full'}
           `}
           isOpen={isPanelOpen}
-          onClose={() => {
-            setSelectedMed(null);
-            setIsPanelOpen(false)
-          }}
+          onClose={handleClosePanel}
         />
       </div>
     </div>

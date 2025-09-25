@@ -69,6 +69,12 @@ export function useMeds() {
     }
   }, []);
 
+  // Clear selected medication and related data
+  const clearSelection = useCallback(() => {
+    setSelectedMed(null);
+    setDrugDetail(null);
+  }, []);
+
   return {
     // Data
     medsList: medsList || { count: 0, results: [] },
@@ -93,6 +99,7 @@ export function useMeds() {
     fetchUnits,
     refetchMeds,
     setAlertMsgs,
+    clearSelection,
 
     // Pagination helpers
     setLimit: (limit: number) => updateFilters({ limit, offset: 0 }),

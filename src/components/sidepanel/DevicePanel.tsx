@@ -27,11 +27,14 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
     getDeviceDetail,
     deactivateDevice,
     deviceDetail,
+    setDeviceDetail,
   } = useDevices()
 
   useEffect(() => {
     if (selectedDevice) {
       getDeviceDetail(selectedDevice.id)
+    } else {
+      setDeviceDetail(null);
     }
   }, [selectedDevice?.id])
 
@@ -59,6 +62,11 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
   const i18nDeviceDirectory = (key: string): string =>
     t(`device-directory.${key}`);
 
+  // Don't render if no device is selected
+  if (!selectedDevice) {
+    return null;
+  }
+
   return (
     <>
     <div
@@ -83,6 +91,7 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
               {selectedDevice?.name}
             </h2>
             <p className="text-sm text-gray-600 font-montserrat">
+              {selectedDevice?.department}
             </p>
           </div>
         </div>

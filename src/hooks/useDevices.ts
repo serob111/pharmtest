@@ -156,6 +156,15 @@ export function useDevices() {
     }
   }, []);
 
+  // Clear selected device and related data
+  const clearSelection = useCallback(() => {
+    setSelectedDevice(null);
+    setDeviceDetail(null);
+    setConnectionDetails(null);
+    setDeviceEvents([]);
+    setDeviceMessages([]);
+  }, []);
+
   return {
     // Data
     devicesList: devicesList || { count: 0, results: [] },
@@ -175,6 +184,7 @@ export function useDevices() {
 
     // Actions
     setSelectedDevice,
+    setDeviceDetail,
     updateFilters,
     getDeviceDetail,
     getConnectionSettings,
@@ -190,6 +200,7 @@ export function useDevices() {
     fetchManufacturers,
     refetchDevices,
     setAlertMsgs,
+    clearSelection,
 
     // Pagination helpers
     setLimit: (limit: number) => updateFilters({ limit, offset: 0 }),

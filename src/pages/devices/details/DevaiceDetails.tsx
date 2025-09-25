@@ -46,7 +46,6 @@ export default function DevaiceDetails({
                             },
                             {
                                 label: 'Added by',
-                                // @ts-ignore
                                 value: deviceDetail?.added_by,
                             }
                             ]}

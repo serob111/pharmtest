@@ -59,15 +59,11 @@ export const TableMed = ({
 
   ];
 
-  const {
-    loadingMed
-  } = useMeds()
-
   return (
     <div className="relative">
       <div>
         <Table columns={columns}>
-          {!loadingMed && medsList.count === 0 ? (
+          {medsList.count === 0 ? (
             <tr>
               <td colSpan={columns.length} className="text-center py-4">
                 <NotMedFound />

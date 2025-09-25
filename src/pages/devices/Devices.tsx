@@ -23,6 +23,7 @@ export default function Devices() {
         setSelectedDevice,
         setOffset,
         updateFilters,
+        clearSelection,
     } = useDevices();
 
     const [IsFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
@@ -86,6 +87,17 @@ export default function Devices() {
         setOffset(0)
         setSearchValue(value)
     }
+
+    const handleClosePanels = () => {
+        setIsDevicePanelOpen(false);
+        setIsFilterPanelOpen(false);
+        // Clear selection when closing panels
+        setTimeout(() => {
+            if (!IsDevicePanelOpen && !IsFilterPanelOpen) {
+                clearSelection();
+            }
+        }, 300); // Wait for animation to complete
+    };
 
     useEffect(() => {
         updateFilters({ search: debouncedSearch || undefined });
@@ -213,7 +225,7 @@ export default function Devices() {
                         ${IsFilterPanelOpen ? 'translate-x-0' : 'translate-x-full'}
                     `}
                     isOpen={IsFilterPanelOpen}
-                    onClose={() => setIsFilterPanelOpen(false)}
+                    onClose={handleClosePanels}
                 />
                 <DevicePanel
                     className={`
@@ -222,7 +234,7 @@ export default function Devices() {
                         ${IsDevicePanelOpen ? 'translate-x-0' : 'translate-x-full'}
                     `}
                     isOpen={IsDevicePanelOpen}
-                    onClose={() => setIsDevicePanelOpen(false)}
+                    onClose={handleClosePanels}
                 />
             </div>
         </div>

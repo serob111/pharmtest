@@ -25,16 +25,24 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
     selectedMed,
     drugDetail,
     getDrugDetail,
+    setDrugDetail,
   } = useMeds()
   
   useEffect(() => {
     if (selectedMed) {
       getDrugDetail(selectedMed.id)
+    } else {
+      setDrugDetail(null);
     }
   }, [selectedMed?.id])
   const { t } = useTranslation()
   const i18nMedDirectory = (key: string): string =>
     t(`med-directory.${key}`);
+
+  // Don't render if no medication is selected
+  if (!selectedMed) {
+    return null;
+  }
 
   return (
     <>
@@ -64,6 +72,7 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
                 {selectedMed?.brand_name}
               </h2>
               <p className="text-sm text-gray-600 font-montserrat">
+                {selectedMed?.active_ingredient}
               </p>
             </div>
           </div>

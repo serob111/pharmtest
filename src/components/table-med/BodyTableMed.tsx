@@ -68,7 +68,7 @@ export const BodyTableMeds = ({
               <div className="flex justify-end items-center h-full w-full">
                 <DropdownMenu
                   onEdit={onEdit}
-                  onDetailView={()=>handleRowClick}
+                  onDetailView={() => handleRowClick(med)}
                 />
               </div>
             </td>

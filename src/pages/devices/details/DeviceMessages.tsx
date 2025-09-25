@@ -4,11 +4,11 @@ import Button from "../../../components/shared/ui/Button/baseBtn";
 
 
 function DevicesMessages() {
-    const { getDevciceLatestMessages, deviceDetail,deviceMessages} = useDevices()
+    const { getDeviceMessages, deviceDetail, deviceMessages } = useDevices()
 
     useEffect(() => {
         if (deviceDetail?.id) {
-            getDevciceLatestMessages(deviceDetail.id)
+            getDeviceMessages(deviceDetail.id)
         }
     }, [deviceDetail?.id])
     return (
@@ -24,7 +24,7 @@ function DevicesMessages() {
 
                         <div className="flex-1 max-w-3xl flex flex-col justify-start items-start gap-1">
                             <div className="w-full text-custom-gray text-xs font-medium leading-[18px] break-words">
-                                {item.created_stamp}
+                                {item.timestamp || item.created_stamp}
                             </div>
                             <div className="w-full text-custom-dark text-sm font-normal leading-[22px] break-words">
                                 {item.message_type}
