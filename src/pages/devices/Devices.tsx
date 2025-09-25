@@ -2,13 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import Header from '../../components/header/Header';
 import { useTranslation } from 'react-i18next';
 import Input from '../../components/shared/ui/input/Input';
-import { TDevice, useDevices } from '../../context/DeviceProvider';
+import { TDevice } from '../../context/DeviceProvider';
+import { useDevices } from '../../hooks/useDevices';
 import { TableDevice } from '../../components/table-device/TableDevice';
 import useDebounce from '../../lib/Debounce';
 import { IconMaterial } from '../../components/shared/iconMaterial/IconMaterial';
 import FilterDevicePanel from '../../components/sidepanel/FilterDevicePanel';
 import DevicePanel from '../../components/sidepanel/DevicePanel';
 import Card from '../../components/card/Card';
+import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
 
 export default function Devices() {
     const {
@@ -16,10 +18,11 @@ export default function Devices() {
         offset,
         devicesList,
         selectedDevice,
-        getDeviceList,
+        devicesLoading,
         setLimit,
         setSelectedDevice,
         setOffset,
+        updateFilters,
     } = useDevices();
 
     const [IsFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
@@ -85,11 +88,7 @@ export default function Devices() {
     }
 
     useEffect(() => {
-        if (debouncedSearch) {
-            getDeviceList({ search: debouncedSearch });
-        } else {
-            getDeviceList()
-        }
+        updateFilters({ search: debouncedSearch || undefined });
     }, [debouncedSearch, limit, offset]);
 
     return (
@@ -162,8 +161,15 @@ export default function Devices() {
                             </div>
                         </div>
                     </div>
+                    
+                    {devicesLoading && (
+                        <div className="flex-1 flex items-center justify-center">
+                            <LoadingSpinner size="lg" text="Loading devices..." />
+                        </div>
+                    )}
+                    
                     {
-                        gridView ? (
+                        !devicesLoading && gridView ? (
                             <div className={`grid ${IsFilterPanelOpen || IsDevicePanelOpen ? 'grid-cols-2' : "grid-cols-3"} gap-4 px-4 mt-4 overflow-y-auto`}>
                                 {paginatedDevicesList.results.map((device) => (
                                     <Card
@@ -184,7 +190,7 @@ export default function Devices() {
                                 ))}
                             </div>
                         ) : (
-                            <div className="flex-1 mt-4 overflow-auto">
+                            !devicesLoading && <div className="flex-1 mt-4 overflow-auto">
                                 <TableDevice
                                     filterNotFound={IsFilterPanelOpen}
                                     offset={offset}

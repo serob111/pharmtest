@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IconMaterial } from '../shared/iconMaterial/IconMaterial';
-import { useDevices } from '../../context/DeviceProvider';
+import { useDevices } from '../../hooks/useDevices';
 import { TabPanel } from '../tab-panel/TabPanel';
 import Modal from '../modal/Modal';
 import Button from '../shared/ui/Button/baseBtn';

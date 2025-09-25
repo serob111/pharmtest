@@ -3,7 +3,8 @@ import Input from "../../../components/shared/ui/input/Input";
 import { useEffect, useState } from "react";
 import Header from "../../../components/header/Header";
 import Button from "../../../components/shared/ui/Button/baseBtn";
-import { TCreateDeviceProp, useDevices } from "../../../context/DeviceProvider";
+import { TCreateDeviceProp } from "../../../context/DeviceProvider";
+import { useDevices } from "../../../hooks/useDevices";
 import { IconMaterial } from "../../../components/shared/iconMaterial/IconMaterial";
 import SelectInput from "../../../components/shared/ui/input/SelectInput";
 import { useLocation } from "react-router";
@@ -18,28 +19,34 @@ export default function EditDevice() {
   const [isOpenDeleteModal, setIsOpenDeleteModal] = useState(false)
   const {
     alertMsgs,
-    EditDevice,
-    getDeviceModels,
+    editDevice,
+    fetchModels,
     deviceModels,
     deviceDetail,
     getDeviceDetail,
-    deleteteDevice
+    deleteDevice
   } = useDevices()
 
   const { state } = useLocation()
 
   useEffect(() => {
     if (state.id) {
-      getDeviceModels()
+      fetchModels()
       getDeviceDetail(state.id)
     }
   }, [state.id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    e.preventDefault();
-    EditDevice(deviceDetail?.id as number, formData)
+    
+    try {
+      await editDevice(deviceDetail?.id as number, formData);
+      window.location.assign('/devices');
+    } catch (error) {
+      // Error handling is done in the hook
+    }
   };
+  
   useEffect(() => {
     if (deviceDetail) {
       setFormData({
@@ -76,7 +83,7 @@ export default function EditDevice() {
   }
 
   const handleSave = () => {
-    deleteteDevice(state.id || deviceDetail?.id)
+    deleteDevice(state.id || deviceDetail?.id)
     window.location.assign('/devices')
   }
 

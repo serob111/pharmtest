@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "../../../components/header/Header";
 import Alert from "../../../components/alert/Alert";
 import Button from "../../../components/shared/ui/Button/baseBtn";
-import { useDevices } from "../../../context/DeviceProvider";
+import { useDevices } from "../../../hooks/useDevices";
 import { IconMaterial } from "../../../components/shared/iconMaterial/IconMaterial";
 import SelectInput from "../../../components/shared/ui/input/SelectInput";
 
@@ -18,26 +18,30 @@ export default function CreateDevice() {
   const [location, setLocation] = useState("");
   const [ip, setIp] = useState<string>("");
   const [port, setPort] = useState<string>("");
-  const { alertMsgs, CreateDevice, getDeviceModels, deviceModels } = useDevices()
+  const { alertMsgs, createDevice, fetchModels, deviceModels } = useDevices()
 
   useEffect(() => {
-    getDeviceModels()
+    fetchModels()
   }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    e.preventDefault();
-    setSubmitted(true);
-    CreateDevice({
-      model,
-      name: device_name,
-      location,
-      config: {
-        ip_address: ip ,
-        port: +port
-      },
-    })
+    
+    try {
+      await createDevice({
+        model,
+        name: device_name,
+        location,
+        config: {
+          ip_address: ip,
+          port: +port
+        },
+      });
+      window.location.assign('/devices');
+    } catch (error) {
+      // Error handling is done in the hook
+    }
   };
 
 

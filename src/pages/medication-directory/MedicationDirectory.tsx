@@ -6,22 +6,25 @@ import Input from '../../components/shared/ui/input/Input';
 import Switch from '../../components/shared/ui/switch/switch';
 import { IconMaterial } from '../../components/shared/iconMaterial/IconMaterial';
 import { TableMed } from '../../components/table-med/TableMed';
-import { TMed, useMeds } from '../../context/MedDirProvider';
+import { TMed } from '../../context/MedDirProvider';
+import { useMeds } from '../../hooks/useMeds';
 import DrugPanel from '../../components/sidepanel/DrugPanel';
 import useDebounce from '../../lib/Debounce';
+import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
 
 export default function MedicationDirectory() {
   const {
     limit,
     offset,
-    isPanelOpen,
     medsList,
-    getDrugList,
+    medsLoading,
     setLimit,
-    setIsPanelOpen,
     setSelectedMed,
-    setOffset
+    setOffset,
+    updateFilters
   } = useMeds();
+  
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('')
   const [useInKiro, setUseInKiro] = useState(false)
   const [isOpenDrugModal, setIsOpenDrugModal] = useState(false)
@@ -82,15 +85,16 @@ export default function MedicationDirectory() {
 
   const toggleKiro = () => {
     setOffset(0)
-    setUseInKiro(!useInKiro)
+    const newUseInKiro = !useInKiro;
+    setUseInKiro(newUseInKiro);
+    updateFilters({ useInKiro: newUseInKiro });
   }
 
   useEffect(() => {
-    if (debouncedSearch) {
-      getDrugList(useInKiro, debouncedSearch);
-    } else {
-      getDrugList(useInKiro)
-    }
+    updateFilters({ 
+      search: debouncedSearch || undefined,
+      useInKiro 
+    });
   }, [debouncedSearch, useInKiro, limit, offset]);
 
   return (
@@ -129,7 +133,7 @@ export default function MedicationDirectory() {
                   icon="sync"
                   className="cursor-pointer"
                   size={16}
-                  onClick={getDrugList}
+                  onClick={() => updateFilters({})}
                   iconColor="var(--tokens-text-secondary-text)"
                 />
                 {i18nMedDirectory('last-updated')} {
@@ -147,7 +151,13 @@ export default function MedicationDirectory() {
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 overflow-auto">
+          {medsLoading && (
+            <div className="flex-1 flex items-center justify-center">
+              <LoadingSpinner size="lg" text="Loading medications..." />
+            </div>
+          )}
+
+          {!medsLoading && <div className="flex-1 min-h-0 overflow-auto">
             <TableMed
               offset={offset}
               onEdit={() => setIsOpenDrugModal(true)}
@@ -158,7 +168,7 @@ export default function MedicationDirectory() {
               medsList={paginatedMedsList}
               limit={limit}
             />
-          </div>
+          </div>}
         </div>
 
         <DrugPanel

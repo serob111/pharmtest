@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, useEffect } from 'react';
 import { IconMaterial } from '../shared/iconMaterial/IconMaterial';
 import Card from '../card/Card';
-import { useMeds } from '../../context/MedDirProvider';
+import { useMeds } from '../../hooks/useMeds';
 import UpdateDrugModal from '../update-drug-modal/UpdateDrugModal';
 import { useTranslation } from 'react-i18next';
 
@@ -26,6 +26,7 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
     drugDetail,
     getDrugDetail,
   } = useMeds()
+  
   useEffect(() => {
     if (selectedMed) {
       getDrugDetail(selectedMed.id)

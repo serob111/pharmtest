@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import Header from '../../components/header/Header';
 import { useTranslation } from 'react-i18next';
-import { useOrders } from '../../context/OrdersProvider';
+import { useOrders } from '../../hooks/useOrders';
 import { useLocation, useNavigate } from 'react-router';
 import Accordeon from '../../components/accordeon/Accordeon';
 import { TooltipCell } from '../../components/table/TooltipCell';
@@ -18,7 +18,7 @@ function OrderDetail() {
         getOrderDetail,
         orderDetail,
         sendOrder,
-        setAlertMessages
+        setAlertMsgs
     } = useOrders()
     const { state } = useLocation();
     const navigate = useNavigate()
@@ -41,7 +41,7 @@ function OrderDetail() {
     };
     return (
         <div className="relative h-screen flex justify-between flex-col overflow-x-hidden">
-            <AlertsWrapper alertState={alertMsgs} setAlertMessages={setAlertMessages} />
+            <AlertsWrapper alertState={alertMsgs} setAlertMessages={setAlertMsgs} />
             <div>
                 <Header
                     title={`OR-${orderDetail?.prescription_detail?.his_prescription_details_id ?? ""}`}

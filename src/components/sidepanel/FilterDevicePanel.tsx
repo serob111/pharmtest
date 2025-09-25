@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { IconMaterial } from '../shared/iconMaterial/IconMaterial';
 import { useTranslation } from 'react-i18next';
 import SelectInput from '../shared/ui/input/SelectInput';
-import { useDevices } from '../../context/DeviceProvider';
+import { useDevices } from '../../hooks/useDevices';
 
 export interface FilterDevicePanelProps {
     isOpen: boolean;
@@ -18,9 +18,9 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
     const {
         deviceModels,
         deviceManufacturers,
-        getDeviceModels,
-        getDeviceManufacturers,
-        getDeviceList
+        fetchModels,
+        fetchManufacturers,
+        updateFilters
     } = useDevices()
 
     const { t } = useTranslation()
@@ -38,17 +38,17 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
     ]
     useEffect(() => {
         if (isOpen) {
-            getDeviceManufacturers()
-            getDeviceModels()
+            fetchManufacturers()
+            fetchModels()
         }
     }, [isOpen])
+    
     useEffect(() => {
-        getDeviceList({
+        updateFilters({
             manufacturers: selectedManufacturers,
             models: selectedModels,
             statuses: selectedStatuses
-        }
-        );
+        });
     }, [selectedModels, selectedManufacturers, selectedStatuses]);
     return (
         <>
