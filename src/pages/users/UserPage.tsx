@@ -4,9 +4,10 @@ import ProfileItem from "../../components/table-user/ProfileItem";
 import { useState } from "react";
 import UpdateNameModal from "../../components/update-modal/UpdateNameModal";
 import UpdatePhoneModal from "../../components/update-modal/UpdatePhoneModal";
-import { useUsers } from "../../context/UsersProvider";
+import { useUsers } from "../../hooks/useUsers";
 import UpdateRoleModal from "../../components/update-modal/UpdateRoleModal";
 import Alert, { AlertType } from "../../components/alert/Alert";
+import LoadingSpinner from "../../components/shared/ui/LoadingSpinner";
 
 export default function UserPage() {
   const { t } = useTranslation()
@@ -18,6 +19,7 @@ export default function UserPage() {
   const [showUpdateRoleModal, setShowUpdateRoleModal] = useState(false);
   const {
     alertMsgs,
+    usersLoading,
     updateUserFullName,
     updateUserPhoneNumber,
     updateUserStatus,
@@ -108,6 +110,13 @@ export default function UserPage() {
         currentRole={selectedProfile.clinic_role}
         onSave={handleSaveRole}
       />
+      
+      {usersLoading && (
+        <div className="flex items-center justify-center p-8">
+          <LoadingSpinner text="Updating user..." />
+        </div>
+      )}
+      
       <div className="p-5 flex flex-col w-full">
         {
           profileItems.map((profileItem, index) =>

@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { IconMaterial } from '../../components/shared/iconMaterial/IconMaterial';
 import Header from '../../components/header/Header';
 import { useTranslation } from 'react-i18next';
-import { TPrescriptionDetail, TPrescriptionDetalItem, usePrescriptions } from '../../context/PrescriptionProvider';
+import { TPrescriptionDetail, TPrescriptionDetalItem } from '../../context/PrescriptionProvider';
+import { usePrescriptions } from '../../hooks/usePrescriptions';
 import { useLocation, useParams } from 'react-router';
+import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
 
 
 
@@ -14,8 +16,9 @@ function PrescriptionDetail() {
     const [expandedPrescriptions, setExpandedPrescriptions] = useState<string[]>([]);
     const { t } = useTranslation()
     const { id } = useParams();
-    const { getPrescriptionDetail, prescriptionDetail } = usePrescriptions()
+    const { getPrescriptionDetail, prescriptionDetail, prescriptionsLoading } = usePrescriptions();
     const { state } = useLocation();
+    
     useEffect(() => {
         if (state?.id) {
             getPrescriptionDetail(state?.id)
@@ -96,6 +99,12 @@ function PrescriptionDetail() {
                     </div>
                 </div>
             </div>
+
+            {prescriptionsLoading && (
+                <div className="flex items-center justify-center p-8">
+                    <LoadingSpinner text="Loading prescription details..." />
+                </div>
+            )}
 
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
                 <div className="bg-white rounded-lg shadow-sm  overflow-hidden">

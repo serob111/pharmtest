@@ -2,7 +2,7 @@ import { Navigate, Outlet, RouterProvider, createBrowserRouter } from "react-rou
 import { useAuth } from "../context/AuthProvider";
 import { DashboardProvider, useDashboard } from "../context/DashboardProvider";
 import { UsersProvider, useUsers } from "../context/UsersProvider";
-import { MedsProvider, useMeds } from "../context/MedDirProvider";
+import { MedsProvider } from "../context/MedDirProvider";
 
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -35,11 +35,10 @@ const PrivateRoutesWrapper = () => {
 };
 
 const PrivateRoutesContent = () => {
-    const { loadingMed } = useMeds()
     const { loading } = useDashboard();
     return (
         <DashboardLayout>
-            {loading || loadingMed ? <Spinner /> : <Outlet />}
+            {loading ? <Spinner /> : <Outlet />}
         </DashboardLayout>
     );
 };

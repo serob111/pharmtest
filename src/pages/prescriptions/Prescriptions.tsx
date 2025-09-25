@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import Header from '../../components/header/Header';
 import { useTranslation } from 'react-i18next';
 import Input from '../../components/shared/ui/input/Input';
-import { TPrescription, usePrescriptions } from '../../context/PrescriptionProvider';
+import { TPrescription } from '../../context/PrescriptionProvider';
+import { usePrescriptions } from '../../hooks/usePrescriptions';
 import useDebounce from '../../lib/Debounce';
 import { IconMaterial } from '../../components/shared/iconMaterial/IconMaterial';
 import { TablePrescription } from '../../components/table-prescriptions/TablePrescription';
 import { useNavigate } from 'react-router';
+import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
 // import FilterPrescriptionPanel from '../../components/sidepanel/FilterPrescriptionPanel';
 // import PrescriptionPanel from '../../components/sidepanel/PrescriptionPanel';
 
@@ -15,10 +17,11 @@ export default function Prescriptions() {
         limit,
         offset,
         prescriptionsList,
-        getPrescriptionList,
+        prescriptionsLoading,
         setLimit,
         setSelectedPrescription,
         setOffset,
+        updateFilters,
     } = usePrescriptions();
 
     const [IsFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
@@ -87,11 +90,7 @@ export default function Prescriptions() {
     }
 
     useEffect(() => {
-        if (debouncedSearch) {
-            getPrescriptionList({ search: debouncedSearch });
-        } else {
-            getPrescriptionList()
-        }
+        updateFilters({ search: debouncedSearch || undefined });
     }, [debouncedSearch, limit, offset]);
 
     return (
@@ -135,7 +134,14 @@ export default function Prescriptions() {
                             </div>
                         </div>
                     </div>
-                    <div className="flex-1 overflow-auto">
+                    
+                    {prescriptionsLoading && (
+                        <div className="flex-1 flex items-center justify-center">
+                            <LoadingSpinner size="lg" text="Loading prescriptions..." />
+                        </div>
+                    )}
+                    
+                    {!prescriptionsLoading && <div className="flex-1 overflow-auto">
                         <TablePrescription
                             filterNotFound={IsFilterPanelOpen}
                             offset={offset}
@@ -146,7 +152,7 @@ export default function Prescriptions() {
                             prescriptionsList={paginatedPrescriptionsList}
                             limit={limit}
                         />
-                    </div>
+                    </div>}
                 </div>
                 {/* <FilterPrescriptionPanel
                     className={`

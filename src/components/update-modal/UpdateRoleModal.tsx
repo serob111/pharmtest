@@ -3,7 +3,7 @@ import Modal from '../modal/Modal';
 import Button from '../shared/ui/Button/baseBtn';
 import { useTranslation } from 'react-i18next';
 import SelectInput from '../shared/ui/input/SelectInput';
-import { useUsers } from '../../context/UsersProvider';
+import { useUsers } from '../../hooks/useUsers';
 
 
 export interface UpdatePhoneModalProps {
@@ -24,12 +24,12 @@ const UpdateRoleModal: React.FC<UpdatePhoneModalProps> = ({
         t(`create-user.${key}`);
     const i18nUpdateUser = (key: string): string =>
         t(`update-profile.${key}`);
-    const { roles, getRoles } = useUsers()
+    const { roles, rolesLoading, fetchRoles } = useUsers();
     const roleID = roles.find(elm => elm.label === currentRole)
     const [role, setRole] = useState(roleID?.id || '');
     useEffect(() => {
         if (isOpen) {
-            getRoles()
+            fetchRoles();
             setRole(roleID?.id as number)
         } else {
             setRole('')
@@ -68,6 +68,7 @@ const UpdateRoleModal: React.FC<UpdatePhoneModalProps> = ({
                         onChange={(value) => setRole(value as string)}
                         value={role as string || ''}
                         options={roles}
+                        disabled={rolesLoading}
                     />
                 </div>
 
