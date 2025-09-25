@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Table } from "../table/Table";
 import { PaginationTable } from "../table/PaginationTable";
-import { TMed, TMedsList, useMeds } from "../../context/MedDirProvider";
+import { TMed, TMedsList } from "../../types/medTypes";
+import { useMeds } from "../../hooks/useMeds";
 import { BodyTableMeds } from "./BodyTableMed";
 import NotMedFound from "./NotMedFound";
 

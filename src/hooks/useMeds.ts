@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { MedService, MedFilters } from '../services/medService';
-import { TMed, TMedsList, TKiroDetail } from '../context/MedDirProvider';
+import { TMed, TMedsList, TKiroDetail } from '../types/medTypes';
 import { useAsync } from './useAsync';
 
 export function useMeds() {

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { PrescriptionService, PrescriptionFilters } from '../services/prescriptionService';
-import { TPrescription, TPrescriptionsList } from '../context/PrescriptionProvider';
+import { TPrescription, TPrescriptionsList } from '../types/prescriptionTypes';
 import { useAsync } from './useAsync';
 
 export function usePrescriptions() {

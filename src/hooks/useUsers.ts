@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { UserService, UserFilters, CreateUserData } from '../services/userService';
-import { TUser, TUsersList, TRole } from '../context/UsersProvider';
+import { TUser, TUsersList, TRole } from '../types/userTypes';
 import { useAsync } from './useAsync';
 
 export function useUsers() {

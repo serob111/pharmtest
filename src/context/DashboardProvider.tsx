@@ -8,7 +8,7 @@ import {
     useMemo,
     useState,
 } from 'react';
-import { TUser } from './UsersProvider';
+import { TUser } from '../types/userTypes';
 import { apiGetProfile } from '../api/dashboard/dashboard';
 import { useSessionStart } from './AuthProvider';
 import { apiAddTwoFactor, apiChangeLanguage, apiDeleteQrCode, apiGetQrCode, apiUpdateName, apiUpdatePassword, apiUpdatePhone } from '../api/profile/profile';

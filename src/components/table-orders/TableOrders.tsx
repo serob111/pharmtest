@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Table } from "../table/Table";
 import { PaginationTable } from "../table/PaginationTable";
 import NotOrderFound from "./NotOrdersFound";
-import { TOrder, TOrdersList } from "../../context/OrdersProvider";
+import { TOrder, TOrdersList } from "../../types/orderTypes";
 import { BodyTableOrders } from "./BodyTableOrders";
 
 type TableOrderProps = {

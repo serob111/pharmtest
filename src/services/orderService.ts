@@ -7,7 +7,7 @@ import {
   apiEditOrder,
   apiDeleteOrder
 } from '../api/orders/orders';
-import { TOrder, TOrdersList, TOrdersDashboard, TCreateOrderProp } from '../context/OrdersProvider';
+import { TOrder, TOrdersList, TOrdersDashboard, TCreateOrderProp } from '../types/orderTypes';
 
 export interface OrderFilters {
   search?: string;

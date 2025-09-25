@@ -2,7 +2,8 @@ import { type JSX } from "react";
 import { cn, parseDateString } from "../../lib/utils";
 import { TooltipCell } from "../table/TooltipCell";
 import { IconMaterial } from "../shared/iconMaterial/IconMaterial";
-import { TOrder, useOrders } from "../../context/OrdersProvider";
+import { TOrder } from "../../types/orderTypes";
+import { useOrders } from "../../hooks/useOrders";
 import Badge from "../shared/ui/Badge";
 
 

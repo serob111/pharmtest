@@ -1,4 +1,4 @@
-import { TCreateOrderProp } from "../../context/OrdersProvider";
+import { TCreateOrderProp } from "../../types/orderTypes";
 import { get, patch, post, remove } from "../../service/axios";
 import qs from "qs";
 

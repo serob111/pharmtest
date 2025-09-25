@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Table } from "../table/Table";
 import { PaginationTable } from "../table/PaginationTable";
 import NotPrescriptionFound from "./NotPrescriptionFound";
-import { TPrescription, TPrescriptionsList } from "../../context/PrescriptionProvider";
+import { TPrescription, TPrescriptionsList } from "../../types/prescriptionTypes";
 import { BodyTablePrescriptions } from "./BodyTablePrescription";
 
 type TablePrescriptionProps = {

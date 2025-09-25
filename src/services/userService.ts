@@ -6,7 +6,7 @@ import {
   apiGetUserRoles 
 } from '../api/users/users';
 import { get, post } from '../service/axios';
-import { TUser, TUsersList, TRole } from '../context/UsersProvider';
+import { TUser, TUsersList, TRole } from '../types/userTypes';
 
 export interface UserFilters {
   limit?: number;

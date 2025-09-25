@@ -4,7 +4,8 @@ import { TooltipCell } from "../table/TooltipCell";
 import Button from "../shared/ui/Button/baseBtn";
 import { IconMaterial } from "../shared/iconMaterial/IconMaterial";
 import DropdownMenu from "../dropdown/DropDownMenu";
-import { TDevice, useDevices } from "../../context/DeviceProvider";
+import { TDevice } from "../../types/deviceTypes";
+import { useDevices } from "../../hooks/useDevices";
 import Badge from "../shared/ui/Badge";
 
 

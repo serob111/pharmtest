@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { OrderService, OrderFilters } from '../services/orderService';
-import { TOrder, TOrdersList, TOrdersDashboard, TCreateOrderProp } from '../context/OrdersProvider';
+import { TOrder, TOrdersList, TOrdersDashboard, TCreateOrderProp } from '../types/orderTypes';
 import { useAsync } from './useAsync';
 import { AlertState } from '../components/alert/AlertsWrapper';
 import { AlertType, AlertVariant } from '../components/alert/Alert';

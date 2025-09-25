@@ -5,7 +5,7 @@ import {
   apiGetDosageUnits,
   apiEditDrug
 } from '../api/drugs/drugs';
-import { TMed, TMedsList, TKiroDetail } from '../context/MedDirProvider';
+import { TMed, TMedsList, TKiroDetail } from '../types/medTypes';
 
 export interface MedFilters {
   search?: string;

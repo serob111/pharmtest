@@ -2,7 +2,8 @@ import { type JSX } from "react";
 import { cn } from "../../lib/utils";
 import { TooltipCell } from "../table/TooltipCell";
 import { IconMaterial } from "../shared/iconMaterial/IconMaterial";
-import { TMed, useMeds } from "../../context/MedDirProvider";
+import { TMed } from "../../types/medTypes";
+import { useMeds } from "../../hooks/useMeds";
 import DropdownMenu from "../dropdown/DropDownMenu";
 
 

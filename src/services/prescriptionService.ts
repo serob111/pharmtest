@@ -5,7 +5,7 @@ import {
   apiEditPrescription,
   apiDeletePrescription
 } from '../api/prescriptions/prescriptions';
-import { TPrescription, TPrescriptionsList } from '../context/PrescriptionProvider';
+import { TPrescription, TPrescriptionsList } from '../types/prescriptionTypes';
 
 export interface PrescriptionFilters {
   search?: string;

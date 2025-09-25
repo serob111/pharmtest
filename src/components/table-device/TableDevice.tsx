@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Table } from "../table/Table";
 import { PaginationTable } from "../table/PaginationTable";
 import NotDeviceFound from "./NotDeviceFound";
-import { TDevice, TDevicesList } from "../../context/DeviceProvider";
+import { TDevice, TDevicesList } from "../../types/deviceTypes";
 import { BodyTableDevices } from "./BodyTableDevice";
 import NotDeviceFilterFound from "./NotDeviceFilterFound";
 

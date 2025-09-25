@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import { Table } from "../../components/table/Table";
 import { PaginationTable } from "../../components/table/PaginationTable";
 import { BodyTableUsers } from "./BodyTableUsers";
-import { TUser, TUsersList } from "../../context/UsersProvider";
+import { TUser, TUsersList } from "../../types/userTypes";
 
 type TableUsersProps = {
   usersList: TUsersList;

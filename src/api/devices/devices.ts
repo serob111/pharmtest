@@ -1,4 +1,4 @@
-import { TConnectionDetails, TCreateDeviceProp } from "../../context/DeviceProvider";
+import { TConnectionDetails, TCreateDeviceProp } from "../../types/deviceTypes";
 import { get, patch, post, remove } from "../../service/axios";
 import qs from "qs";
 

@@ -1,4 +1,4 @@
-import { TKiroDetail } from "../../context/MedDirProvider";
+import { TKiroDetail } from "../../types/medTypes";
 import { get, patch } from "../../service/axios";
 
 export type TGetDrugs = {

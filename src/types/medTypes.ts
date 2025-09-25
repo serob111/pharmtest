@@ -1,14 +1,3 @@
-import {
-    createContext,
-    ReactNode,
-    useContext,
-    useMemo,
-} from 'react';
-
-type TProps = {
-    children: ReactNode;
-};
-
 export type TMed = {
     id: string;
     brand_name: string;
@@ -47,25 +36,4 @@ export type TKiroDetail = {
     vial_dose: string;
     vial_unit: string;
     density: string;
-};
-
-type TContext = {
-    // This context is now minimal and only provides types
-    // All data fetching is handled by hooks
-};
-
-const MedContext = createContext<TContext>({} as TContext);
-
-export const MedsProvider = ({ children }: TProps) => {
-    const contextValue = useMemo(() => ({}), []);
-
-    return (
-        <MedContext.Provider value={contextValue}>
-            {children}
-        </MedContext.Provider>
-    );
-};
-
-export const useMeds = () => {
-    return useContext(MedContext);
 };

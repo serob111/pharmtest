@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { DeviceService, DeviceFilters } from '../services/deviceService';
-import { TDevice, TDevicesList, TCreateDeviceProp, TConnectionDetails } from '../context/DeviceProvider';
+import { TDevice, TDevicesList, TCreateDeviceProp, TConnectionDetails } from '../types/deviceTypes';
 import { useAsync } from './useAsync';
 
 export function useDevices() {

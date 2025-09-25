@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { IconMaterial } from '../../components/shared/iconMaterial/IconMaterial';
 import Header from '../../components/header/Header';
 import { useTranslation } from 'react-i18next';
-import { TPrescriptionDetail, TPrescriptionDetalItem } from '../../context/PrescriptionProvider';
+import { TPrescriptionDetail, TPrescriptionDetalItem } from '../../types/prescriptionTypes';
 import { usePrescriptions } from '../../hooks/usePrescriptions';
 import { useLocation, useParams } from 'react-router';
 import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';

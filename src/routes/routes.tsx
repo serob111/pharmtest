@@ -1,8 +1,6 @@
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from "react-router";
 import { useAuth } from "../context/AuthProvider";
 import { DashboardProvider, useDashboard } from "../context/DashboardProvider";
-import { UsersProvider, useUsers } from "../context/UsersProvider";
-import { MedsProvider } from "../context/MedDirProvider";
 
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -16,15 +14,13 @@ import AccountSettings from "../pages/accountsettings/AccountSettings";
 
 import Spinner from "../components/shared/ui/Spinner";
 import Devices from "../pages/devices/Devices";
-import { DeviceProvider } from "../context/DeviceProvider";
 import CreateDevice from "../pages/devices/create-device/CreateDevice";
 import EditDevice from "../pages/devices/edit-device/EditDevice";
-import { PrescriptionProvider } from "../context/PrescriptionProvider";
 import Prescriptions from "../pages/prescriptions/Prescriptions";
 import PrescriptionDetail from "../pages/prescriptions/PrescriptionDetail";
-import { OrderProvider } from "../context/OrdersProvider";
 import Orders from "../pages/orders/Orders";
 import OrderDetail from "../pages/orders/OrderDetail";
+import { useUsers } from "../hooks/useUsers";
 
 const PrivateRoutesWrapper = () => {
     return (
@@ -83,10 +79,7 @@ export const Routes = () => {
                     children: [
                         {
                             path: "users",
-                            element:
-                                <UsersProvider>
-                                    <Outlet />
-                                </UsersProvider>,
+                            element: <Outlet />,
                             children: [
                                 {
                                     index: true,
@@ -107,17 +100,11 @@ export const Routes = () => {
                         },
                         {
                             path: "medicationdirectory",
-                            element:
-                                <MedsProvider>
-                                    <MedicationDirectory />
-                                </MedsProvider>
+                            element: <MedicationDirectory />
                         },
                         {
                             path: "devices",
-                            element:
-                                <DeviceProvider>
-                                    <Outlet />
-                                </DeviceProvider>,
+                            element: <Outlet />,
                             children: [
                                 {
                                     index: true,
@@ -138,10 +125,7 @@ export const Routes = () => {
                         },
                         {
                             path: "prescriptions",
-                            element:
-                                <PrescriptionProvider>
-                                    <Outlet />
-                                </PrescriptionProvider>,
+                            element: <Outlet />,
                             children: [
                                 {
                                     index: true,
@@ -155,10 +139,7 @@ export const Routes = () => {
                         },
                         {
                             path: "orders",
-                            element:
-                                <OrderProvider>
-                                    <Outlet />
-                                </OrderProvider>,
+                            element: <Outlet />,
                             children: [
                                 {
                                     index: true,

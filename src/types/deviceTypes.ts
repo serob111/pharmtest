@@ -1,14 +1,3 @@
-import {
-    createContext,
-    ReactNode,
-    useContext,
-    useMemo,
-} from 'react';
-
-type TProps = {
-    children: ReactNode;
-};
-
 export type TDevice = {
     id: number;
     name: string;
@@ -58,25 +47,4 @@ export type TConnectionDetails = {
     keep_alive_interval: string;
     failure_threshold: string;
     description: string;
-};
-
-type TContext = {
-    // This context is now minimal and only provides types
-    // All data fetching is handled by hooks
-};
-
-const DeviceContext = createContext<TContext>({} as TContext);
-
-export const DeviceProvider = ({ children }: TProps) => {
-    const contextValue = useMemo(() => ({}), []);
-
-    return (
-        <DeviceContext.Provider value={contextValue}>
-            {children}
-        </DeviceContext.Provider>
-    );
-};
-
-export const useDevices = () => {
-    return useContext(DeviceContext);
 };

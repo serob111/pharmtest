@@ -13,7 +13,7 @@ import {
   apiGetDeviceConnectionSettings,
   apiUpdateConnection
 } from '../api/devices/devices';
-import { TDevice, TDevicesList, TCreateDeviceProp, TConnectionDetails } from '../context/DeviceProvider';
+import { TDevice, TDevicesList, TCreateDeviceProp, TConnectionDetails } from '../types/deviceTypes';
 
 export interface DeviceFilters {
   search?: string;
