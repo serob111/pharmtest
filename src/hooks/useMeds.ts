@@ -1,75 +1,78 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { MedService, MedFilters } from '../services/medService';
 import { TMed, TMedsList, TKiroDetail } from '../types/medTypes';
-import { useAsync } from './useAsync';
 
 export function useMeds() {
+  const [medsList, setMedsList] = useState<TMedsList>({ count: 0, results: [] });
+  const [medsLoading, setMedsLoading] = useState(false);
   const [selectedMed, setSelectedMed] = useState<TMed | null>(null);
   const [drugDetail, setDrugDetail] = useState<TMed | null>(null);
+  const [activeIngredients, setActiveIngredients] = useState<any[]>([]);
+  const [dosageUnits, setDosageUnits] = useState<any[]>([]);
+  const [ingredientsLoading, setIngredientsLoading] = useState(false);
+  const [unitsLoading, setUnitsLoading] = useState(false);
   const [alertMsgs, setAlertMsgs] = useState<Record<string, string[]>>({});
-
-  // Meds list with filters
   const [filters, setFilters] = useState<MedFilters>({ limit: 10, offset: 0 });
-  
-  const {
-    data: medsList,
-    loading: medsLoading,
-    error: medsError,
-    execute: refetchMeds
-  } = useAsync(
-    () => MedService.getMeds(filters),
-    [] // Empty dependency array - we'll manually trigger refetch
-  );
 
-  // Active ingredients
-  const {
-    data: activeIngredients,
-    loading: ingredientsLoading,
-    execute: fetchIngredients
-  } = useAsync(
-    () => MedService.getActiveIngredients(),
-    [],
-    { immediate: false }
-  );
+  // Fetch meds function
+  const fetchMeds = useCallback(async (filterParams: MedFilters) => {
+    setMedsLoading(true);
+    try {
+      console.log('Fetching meds with filters:', filterParams);
+      const data = await MedService.getMeds(filterParams);
+      console.log('Received meds data:', data);
+      setMedsList(data);
+    } catch (error) {
+      console.error('Error fetching meds:', error);
+      setMedsList({ count: 0, results: [] });
+    } finally {
+      setMedsLoading(false);
+    }
+  }, []);
 
-  // Dosage units
-  const {
-    data: dosageUnits,
-    loading: unitsLoading,
-    execute: fetchUnits
-  } = useAsync(
-    () => MedService.getDosageUnits(),
-    [],
-    { immediate: false }
-  );
-
+  // Update filters and fetch data
   const updateFilters = useCallback((newFilters: Partial<MedFilters>) => {
-    setFilters(prev => {
-      const updated = { ...prev, ...newFilters };
-      console.log('Updating med filters:', updated);
-      
-      // Manually trigger refetch with new filters
-      MedService.getMeds(updated).then(() => {
-        refetchMeds();
-      }).catch(error => {
-        console.error('Error fetching meds:', error);
-      });
-      
-      return updated;
-    });
-  }, [refetchMeds]);
+    const updatedFilters = { ...filters, ...newFilters };
+    console.log('Updating med filters from:', filters, 'to:', updatedFilters);
+    setFilters(updatedFilters);
+    fetchMeds(updatedFilters);
+  }, [filters, fetchMeds]);
 
+  // Reset filters
   const resetFilters = useCallback(() => {
     const defaultFilters = { limit: 10, offset: 0 };
     setFilters(defaultFilters);
-    
-    // Manually trigger refetch with default filters
-    MedService.getMeds(defaultFilters).then(() => {
-      refetchMeds();
-    }).catch(error => {
-      console.error('Error fetching meds:', error);
-    });
-  }, [refetchMeds]);
+    fetchMeds(defaultFilters);
+  }, [fetchMeds]);
+
+  // Initial load
+  useEffect(() => {
+    fetchMeds(filters);
+  }, []); // Only run once on mount
+
+  const fetchIngredients = useCallback(async () => {
+    setIngredientsLoading(true);
+    try {
+      const data = await MedService.getActiveIngredients();
+      setActiveIngredients(data.results || []);
+    } catch (error) {
+      console.error('Error fetching ingredients:', error);
+    } finally {
+      setIngredientsLoading(false);
+    }
+  }, []);
+
+  const fetchUnits = useCallback(async () => {
+    setUnitsLoading(true);
+    try {
+      const data = await MedService.getDosageUnits();
+      setDosageUnits(data.results || []);
+    } catch (error) {
+      console.error('Error fetching units:', error);
+    } finally {
+      setUnitsLoading(false);
+    }
+  }, []);
 
   const getDrugDetail = useCallback(async (id: string) => {
     try {
@@ -94,7 +97,6 @@ export function useMeds() {
     }
   }, []);
 
-  // Clear selected medication and related data
   const clearSelection = useCallback(() => {
     setSelectedMed(null);
     setDrugDetail(null);
@@ -102,9 +104,9 @@ export function useMeds() {
 
   return {
     // Data
-    medsList: medsList || { count: 0, results: [] },
-    activeIngredients: activeIngredients?.results || [],
-    dosageUnits: dosageUnits?.results || [],
+    medsList,
+    activeIngredients,
+    dosageUnits,
     selectedMed,
     drugDetail,
     alertMsgs,
@@ -124,7 +126,7 @@ export function useMeds() {
     editDrug,
     fetchIngredients,
     fetchUnits,
-    refetchMeds,
+    fetchMeds,
     setAlertMsgs,
     clearSelection,
 

@@ -1,79 +1,73 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { DeviceService, DeviceFilters } from '../services/deviceService';
 import { TDevice, TDevicesList, TCreateDeviceProp, TConnectionDetails } from '../types/deviceTypes';
-import { useAsync } from './useAsync';
 
 export function useDevices() {
+  const [devicesList, setDevicesList] = useState<TDevicesList>({ count: 0, results: [] });
+  const [devicesLoading, setDevicesLoading] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null);
   const [deviceDetail, setDeviceDetail] = useState<TDevice | null>(null);
   const [connectionDetails, setConnectionDetails] = useState<TConnectionDetails | null>(null);
   const [deviceEvents, setDeviceEvents] = useState<any[]>([]);
   const [deviceMessages, setDeviceMessages] = useState<any[]>([]);
+  const [deviceModels, setDeviceModels] = useState<any[]>([]);
+  const [deviceManufacturers, setDeviceManufacturers] = useState<any[]>([]);
   const [alertMsgs, setAlertMsgs] = useState<Record<string, string[]>>({});
-
-  // Device list with filters - start with initial filters
   const [filters, setFilters] = useState<DeviceFilters>({ limit: 10, offset: 0 });
-  
-  const {
-    data: devicesList,
-    loading: devicesLoading,
-    error: devicesError,
-    execute: refetchDevices
-  } = useAsync(
-    () => DeviceService.getDevices(filters),
-    [] // Empty dependency array - we'll manually trigger refetch
-  );
 
-  // Device models
-  const {
-    data: deviceModels,
-    loading: modelsLoading,
-    execute: fetchModels
-  } = useAsync(
-    () => DeviceService.getDeviceModels(),
-    [],
-    { immediate: false }
-  );
+  // Fetch devices function
+  const fetchDevices = useCallback(async (filterParams: DeviceFilters) => {
+    setDevicesLoading(true);
+    try {
+      console.log('Fetching devices with filters:', filterParams);
+      const data = await DeviceService.getDevices(filterParams);
+      console.log('Received devices data:', data);
+      setDevicesList(data);
+    } catch (error) {
+      console.error('Error fetching devices:', error);
+      setDevicesList({ count: 0, results: [] });
+    } finally {
+      setDevicesLoading(false);
+    }
+  }, []);
 
-  // Device manufacturers
-  const {
-    data: deviceManufacturers,
-    loading: manufacturersLoading,
-    execute: fetchManufacturers
-  } = useAsync(
-    () => DeviceService.getDeviceManufacturers(),
-    [],
-    { immediate: false }
-  );
-
+  // Update filters and fetch data
   const updateFilters = useCallback((newFilters: Partial<DeviceFilters>) => {
-    setFilters(prev => {
-      const updated = { ...prev, ...newFilters };
-      console.log('Updating device filters:', updated);
-      
-      // Manually trigger refetch with new filters
-      DeviceService.getDevices(updated).then(data => {
-        // Update the async state manually
-        refetchDevices();
-      }).catch(error => {
-        console.error('Error fetching devices:', error);
-      });
-      
-      return updated;
-    });
-  }, [refetchDevices]);
+    const updatedFilters = { ...filters, ...newFilters };
+    console.log('Updating filters from:', filters, 'to:', updatedFilters);
+    setFilters(updatedFilters);
+    fetchDevices(updatedFilters);
+  }, [filters, fetchDevices]);
 
+  // Reset filters
   const resetFilters = useCallback(() => {
     const defaultFilters = { limit: 10, offset: 0 };
     setFilters(defaultFilters);
-    
-    // Manually trigger refetch with default filters
-    DeviceService.getDevices(defaultFilters).then(() => {
-      refetchDevices();
-    }).catch(error => {
-      console.error('Error fetching devices:', error);
-    });
-  }, [refetchDevices]);
+    fetchDevices(defaultFilters);
+  }, [fetchDevices]);
+
+  // Initial load
+  useEffect(() => {
+    fetchDevices(filters);
+  }, []); // Only run once on mount
+
+  const fetchModels = useCallback(async () => {
+    try {
+      const models = await DeviceService.getDeviceModels();
+      setDeviceModels(models);
+    } catch (error) {
+      console.error('Error fetching models:', error);
+    }
+  }, []);
+
+  const fetchManufacturers = useCallback(async () => {
+    try {
+      const manufacturers = await DeviceService.getDeviceManufacturers();
+      setDeviceManufacturers(manufacturers);
+    } catch (error) {
+      console.error('Error fetching manufacturers:', error);
+    }
+  }, []);
 
   const getDeviceDetail = useCallback(async (id: number) => {
     try {
@@ -112,44 +106,44 @@ export function useDevices() {
   const createDevice = useCallback(async (data: TCreateDeviceProp) => {
     try {
       const newDevice = await DeviceService.createDevice(data);
-      refetchDevices();
+      fetchDevices(filters);
       return newDevice;
     } catch (error: any) {
       setAlertMsgs(error.response?.data || {});
       throw error;
     }
-  }, [refetchDevices]);
+  }, [filters, fetchDevices]);
 
   const editDevice = useCallback(async (id: number, data: TCreateDeviceProp) => {
     try {
       const updated = await DeviceService.editDevice(id, data);
-      refetchDevices();
+      fetchDevices(filters);
       return updated;
     } catch (error: any) {
       setAlertMsgs(error.response?.data || {});
       throw error;
     }
-  }, [refetchDevices]);
+  }, [filters, fetchDevices]);
 
   const deleteDevice = useCallback(async (id: number) => {
     try {
       await DeviceService.deleteDevice(id);
-      refetchDevices();
+      fetchDevices(filters);
     } catch (error: any) {
       setAlertMsgs(error.response?.data || {});
       throw error;
     }
-  }, [refetchDevices]);
+  }, [filters, fetchDevices]);
 
   const deactivateDevice = useCallback(async (id: number) => {
     try {
       await DeviceService.deactivateDevice(id);
-      refetchDevices();
+      fetchDevices(filters);
     } catch (error: any) {
       setAlertMsgs(error.response?.data || {});
       throw error;
     }
-  }, [refetchDevices]);
+  }, [filters, fetchDevices]);
 
   const pingDevice = useCallback(async (id: number) => {
     try {
@@ -182,7 +176,6 @@ export function useDevices() {
     }
   }, []);
 
-  // Clear selected device and related data
   const clearSelection = useCallback(() => {
     setSelectedDevice(null);
     setDeviceDetail(null);
@@ -193,9 +186,9 @@ export function useDevices() {
 
   return {
     // Data
-    devicesList: devicesList || { count: 0, results: [] },
-    deviceModels: deviceModels || [],
-    deviceManufacturers: deviceManufacturers || [],
+    devicesList,
+    deviceModels,
+    deviceManufacturers,
     selectedDevice,
     deviceDetail,
     connectionDetails,
@@ -206,8 +199,6 @@ export function useDevices() {
 
     // Loading states
     devicesLoading,
-    modelsLoading,
-    manufacturersLoading,
 
     // Actions
     setSelectedDevice,
@@ -226,7 +217,7 @@ export function useDevices() {
     getDeviceMessages,
     fetchModels,
     fetchManufacturers,
-    refetchDevices,
+    fetchDevices,
     setAlertMsgs,
     clearSelection,
 

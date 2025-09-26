@@ -25,17 +25,16 @@ export default function MedicationDirectory() {
     updateFilters,
     resetFilters,
     clearSelection,
-    refetchMeds
   } = useMeds();
   
   const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState('')
-  const [useInKiro, setUseInKiro] = useState(filters.useInKiro || false)
-  const [isOpenDrugModal, setIsOpenDrugModal] = useState(false)
-  const { t } = useTranslation()
+  const [searchValue, setSearchValue] = useState('');
+  const [useInKiro, setUseInKiro] = useState(false);
+  const [isOpenDrugModal, setIsOpenDrugModal] = useState(false);
+  const { t } = useTranslation();
   const i18nMedDirectory = (key: string): string =>
     t(`med-directory.${key}`);
-  const debouncedSearch = useDebounce(searchValue, 500)
+  const debouncedSearch = useDebounce(searchValue, 500);
 
   const [sortConfig, setSortConfig] = useState<{
     field: keyof TMed | null;
@@ -45,20 +44,13 @@ export default function MedicationDirectory() {
     direction: 'asc',
   });
 
-  // Initial data fetch
+  // Handle search when debounced value changes
   useEffect(() => {
-    refetchMeds();
-  }, []);
-
-  // Handle debounced search
-  useEffect(() => {
-    if (debouncedSearch !== (filters.search || '')) {
-      console.log('Search changed:', debouncedSearch);
-      updateFilters({ 
-        search: debouncedSearch || undefined,
-        offset: 0
-      });
-    }
+    console.log('Search effect triggered:', debouncedSearch);
+    updateFilters({ 
+      search: debouncedSearch || undefined,
+      offset: 0
+    });
   }, [debouncedSearch]);
 
   const handleSort = (field: keyof TMed) => {
@@ -100,11 +92,13 @@ export default function MedicationDirectory() {
   };
 
   const handleSearch = (value: string) => {
+    console.log('Search input changed:', value);
     setSearchValue(value);
   };
 
   const toggleKiro = () => {
     const newUseInKiro = !useInKiro;
+    console.log('KIRO filter changed:', newUseInKiro);
     setUseInKiro(newUseInKiro);
     updateFilters({ 
       useInKiro: newUseInKiro,
@@ -114,18 +108,15 @@ export default function MedicationDirectory() {
 
   const handleClosePanel = () => {
     setIsPanelOpen(false);
-    // Clear selection when closing panel
     setTimeout(() => {
-      if (!isPanelOpen) {
-        clearSelection();
-      }
-    }, 300); // Wait for animation to complete
+      clearSelection();
+    }, 300);
   };
 
   const handleRefresh = () => {
-    resetFilters();
     setSearchValue('');
     setUseInKiro(false);
+    resetFilters();
   };
 
   return (

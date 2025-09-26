@@ -26,17 +26,16 @@ export default function Devices() {
         updateFilters,
         resetFilters,
         clearSelection,
-        refetchDevices,
     } = useDevices();
 
-    const [IsFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
-    const [IsDevicePanelOpen, setIsDevicePanelOpen] = useState(false)
-    const [gridView, setGridView] = useState(false)
-    const [searchValue, setSearchValue] = useState('')
-    const { t } = useTranslation()
+    const [IsFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+    const [IsDevicePanelOpen, setIsDevicePanelOpen] = useState(false);
+    const [gridView, setGridView] = useState(false);
+    const [searchValue, setSearchValue] = useState('');
+    const { t } = useTranslation();
     const i18nDeviceDirectory = (key: string): string =>
         t(`device-directory.${key}`);
-    const debouncedSearch = useDebounce(searchValue, 500)
+    const debouncedSearch = useDebounce(searchValue, 500);
     
     const [sortConfig, setSortConfig] = useState<{
         field: keyof TDevice | null;
@@ -46,20 +45,13 @@ export default function Devices() {
         direction: 'asc',
     });
 
-    // Initial data fetch
+    // Handle search when debounced value changes
     useEffect(() => {
-        refetchDevices();
-    }, []);
-
-    // Handle debounced search
-    useEffect(() => {
-        if (debouncedSearch !== (filters.search || '')) {
-            console.log('Search changed:', debouncedSearch);
-            updateFilters({ 
-                search: debouncedSearch || undefined,
-                offset: 0 
-            });
-        }
+        console.log('Search effect triggered:', debouncedSearch);
+        updateFilters({ 
+            search: debouncedSearch || undefined,
+            offset: 0 
+        });
     }, [debouncedSearch]);
 
     const handleSort = (field: keyof TDevice) => {
@@ -105,18 +97,21 @@ export default function Devices() {
     };
 
     const handleSearch = (value: string) => {
+        console.log('Search input changed:', value);
         setSearchValue(value);
     };
 
     const handleClosePanels = () => {
         setIsDevicePanelOpen(false);
         setIsFilterPanelOpen(false);
-        // Clear selection when closing panels
         setTimeout(() => {
-            if (!IsDevicePanelOpen && !IsFilterPanelOpen) {
-                clearSelection();
-            }
-        }, 300); // Wait for animation to complete
+            clearSelection();
+        }, 300);
+    };
+
+    const handleRefresh = () => {
+        setSearchValue('');
+        resetFilters();
     };
 
     return (
@@ -152,7 +147,7 @@ export default function Devices() {
                             <div className='flex gap-2'>
                                 <div
                                     onClick={handleFilterClick}
-                                    className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer  rounded-lg"
+                                    className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer rounded-lg"
                                 >
                                     <IconMaterial
                                         filled
@@ -162,9 +157,20 @@ export default function Devices() {
                                     />
                                     <p className="text-sm text-primary-light">{i18nDeviceDirectory('filters')}</p>
                                 </div>
+                                <div
+                                    onClick={handleRefresh}
+                                    className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer rounded-lg"
+                                >
+                                    <IconMaterial
+                                        filled
+                                        icon="refresh"
+                                        className="cursor-pointer text-primary-light"
+                                        size={15}
+                                    />
+                                </div>
                                 <div className='flex'>
                                     <div
-                                        className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer  rounded-l-lg"
+                                        className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer rounded-l-lg"
                                     >
                                         <IconMaterial
                                             onClick={() => setGridView(false)}
@@ -175,7 +181,7 @@ export default function Devices() {
                                         />
                                     </div>  
                                     <div
-                                        className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer  rounded-r-lg"
+                                        className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer rounded-r-lg"
                                     >
                                         <IconMaterial
                                             onClick={() => setGridView(true)}
