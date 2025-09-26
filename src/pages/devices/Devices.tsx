@@ -19,10 +19,12 @@ export default function Devices() {
         devicesList,
         selectedDevice,
         devicesLoading,
+        filters,
         setLimit,
         setSelectedDevice,
         setOffset,
         updateFilters,
+        resetFilters,
         clearSelection,
     } = useDevices();
 
@@ -75,6 +77,7 @@ export default function Devices() {
     }, [devicesList, sortConfig, offset, limit]);
 
     const handleRowClick = (device: TDevice) => {
+        console.log('Device selected:', device);
         setSelectedDevice(device);
         setIsDevicePanelOpen(true);
     };
@@ -84,7 +87,7 @@ export default function Devices() {
     };
 
     const handleSearch = (value: string) => {
-        setOffset(0)
+        updateFilters({ offset: 0 });
         setSearchValue(value)
     }
 
@@ -99,15 +102,21 @@ export default function Devices() {
         }, 300); // Wait for animation to complete
     };
 
+    // Update search filter when debounced search changes
     useEffect(() => {
-        updateFilters({ search: debouncedSearch || undefined });
-    }, [debouncedSearch, limit, offset]);
+        if (debouncedSearch !== filters.search) {
+            updateFilters({ 
+                search: debouncedSearch || undefined,
+                offset: 0 // Reset to first page when searching
+            });
+        }
+    }, [debouncedSearch]);
 
     return (
         <div className="h-screen flex flex-col overflow-hidden">
             <div className="flex-shrink-0">
                 <Header
-                    create={'/'}
+                    create={'/devices/adding/new'}
                     title={i18nDeviceDirectory('device-directory')}
                 />
             </div>
@@ -205,6 +214,7 @@ export default function Devices() {
                             !devicesLoading && <div className="flex-1 mt-4 overflow-auto">
                                 <TableDevice
                                     filterNotFound={IsFilterPanelOpen}
+                                    selectedDevice={selectedDevice}
                                     offset={offset}
                                     setOffset={setOffset}
                                     handleSort={handleSort}

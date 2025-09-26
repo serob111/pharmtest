@@ -1,20 +1,20 @@
 import { useEffect } from "react";
-import { useDevices } from "../../../context/DeviceProvider";
+import { useDevices } from "../../../hooks/useDevices";
 import Button from "../../../components/shared/ui/Button/baseBtn";
 import { useTranslation } from "react-i18next";
 
 
 
 function DetailEvents() {
-    const { getDeviceEvents, deviceDetail, deviceEvents } = useDevices()
+    const { getDeviceEvents, selectedDevice, deviceEvents } = useDevices()
     const { t } = useTranslation()
     const i18nDeviceDirectory = (key: string): string =>
         t(`device-directory.${key}`);
     useEffect(() => {
-        if (deviceDetail?.id) {
-            getDeviceEvents(deviceDetail.id)
+        if (selectedDevice?.id) {
+            getDeviceEvents(selectedDevice.id)
         }
-    }, [deviceDetail?.id])
+    }, [selectedDevice?.id])
 
     return (
         <div className="w-full h-full p-4 bg-white  flex flex-col justify-between items-start gap-4 font-montserrat">

@@ -1,16 +1,16 @@
 import { useEffect } from "react";
-import { useDevices } from "../../../context/DeviceProvider";
+import { useDevices } from "../../../hooks/useDevices";
 import Button from "../../../components/shared/ui/Button/baseBtn";
 
 
 function DevicesMessages() {
-    const { getDeviceMessages, deviceDetail, deviceMessages } = useDevices()
+    const { getDeviceMessages, selectedDevice, deviceMessages } = useDevices()
 
     useEffect(() => {
-        if (deviceDetail?.id) {
-            getDeviceMessages(deviceDetail.id)
+        if (selectedDevice?.id) {
+            getDeviceMessages(selectedDevice.id)
         }
-    }, [deviceDetail?.id])
+    }, [selectedDevice?.id])
     return (
         <div className="w-full h-full p-4 bg-white  flex flex-col justify-between items-start gap-4 font-montserrat">
             <div className="w-full max-w-md relative flex flex-col justify-start items-start gap-4">

@@ -3,7 +3,6 @@ import { cn } from "../../lib/utils";
 import { TooltipCell } from "../table/TooltipCell";
 import { IconMaterial } from "../shared/iconMaterial/IconMaterial";
 import { TMed } from "../../types/medTypes";
-import { useMeds } from "../../hooks/useMeds";
 import DropdownMenu from "../dropdown/DropDownMenu";
 
 
@@ -14,20 +13,19 @@ type BodyTableProps = {
   isPagination?: boolean;
   isLoadingSendInvitation: boolean;
   onEdit?: () => void;
+  selectedMed?: TMed | null;
 };
 
 export const BodyTableMeds = ({
   rows,
   handleRowClick,
-  onEdit
+  onEdit,
+  selectedMed
 }: BodyTableProps): JSX.Element => {
   const baseCellClassName = cn(
     "p-[12px] typo-body-small-medium-14 text-black text-sm text-primary-light",
     "align-middle min-w-0",
   );
-  const {
-    selectedMed
-  } = useMeds()
   return (
     <>
       {rows.map((med) => {

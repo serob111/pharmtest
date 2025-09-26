@@ -6,7 +6,7 @@ import Input from '../../components/shared/ui/input/Input';
 import Switch from '../../components/shared/ui/switch/switch';
 import { IconMaterial } from '../../components/shared/iconMaterial/IconMaterial';
 import { TableMed } from '../../components/table-med/TableMed';
-import { TMed } from '../../context/MedDirProvider';
+import { TMed } from '../../types/medTypes';
 import { useMeds } from '../../hooks/useMeds';
 import DrugPanel from '../../components/sidepanel/DrugPanel';
 import useDebounce from '../../lib/Debounce';
@@ -19,16 +19,18 @@ export default function MedicationDirectory() {
     medsList,
     medsLoading,
     selectedMed,
+    filters,
     setLimit,
     setSelectedMed,
     setOffset,
     updateFilters,
+    resetFilters,
     clearSelection
   } = useMeds();
   
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('')
-  const [useInKiro, setUseInKiro] = useState(false)
+  const [useInKiro, setUseInKiro] = useState(filters.useInKiro || false)
   const [isOpenDrugModal, setIsOpenDrugModal] = useState(false)
   const { t } = useTranslation()
   const i18nMedDirectory = (key: string): string =>
@@ -76,20 +78,23 @@ export default function MedicationDirectory() {
   }, [medsList, sortConfig, offset, limit]);
 
   const handleRowClick = (med: TMed) => {
+    console.log('Med selected:', med);
     setSelectedMed(med);
     setIsPanelOpen(true);
   };
 
   const handleSearch = (value: string) => {
-    setOffset(0)
+    updateFilters({ offset: 0 });
     setSearchValue(value)
   }
 
   const toggleKiro = () => {
-    setOffset(0)
     const newUseInKiro = !useInKiro;
     setUseInKiro(newUseInKiro);
-    updateFilters({ useInKiro: newUseInKiro });
+    updateFilters({ 
+      useInKiro: newUseInKiro,
+      offset: 0
+    });
   }
 
   const handleClosePanel = () => {
@@ -102,12 +107,21 @@ export default function MedicationDirectory() {
     }, 300); // Wait for animation to complete
   };
 
+  const handleRefresh = () => {
+    resetFilters();
+    setSearchValue('');
+    setUseInKiro(false);
+  };
+
+  // Update search filter when debounced search changes
   useEffect(() => {
-    updateFilters({ 
-      search: debouncedSearch || undefined,
-      useInKiro 
-    });
-  }, [debouncedSearch, useInKiro, limit, offset]);
+    if (debouncedSearch !== filters.search) {
+      updateFilters({ 
+        search: debouncedSearch || undefined,
+        offset: 0
+      });
+    }
+  }, [debouncedSearch]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -145,7 +159,7 @@ export default function MedicationDirectory() {
                   icon="sync"
                   className="cursor-pointer"
                   size={16}
-                  onClick={() => updateFilters({})}
+                  onClick={handleRefresh}
                   iconColor="var(--tokens-text-secondary-text)"
                 />
                 {i18nMedDirectory('last-updated')} {
@@ -176,6 +190,7 @@ export default function MedicationDirectory() {
               setOffset={setOffset}
               handleSort={handleSort}
               handleRowClick={handleRowClick}
+              selectedMed={selectedMed}
               setLimit={setLimit}
               medsList={paginatedMedsList}
               limit={limit}

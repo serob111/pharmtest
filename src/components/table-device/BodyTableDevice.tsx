@@ -1,11 +1,8 @@
 import { type JSX } from "react";
 import { cn, parseDateString } from "../../lib/utils";
 import { TooltipCell } from "../table/TooltipCell";
-import Button from "../shared/ui/Button/baseBtn";
 import { IconMaterial } from "../shared/iconMaterial/IconMaterial";
-import DropdownMenu from "../dropdown/DropDownMenu";
 import { TDevice } from "../../types/deviceTypes";
-import { useDevices } from "../../hooks/useDevices";
 import Badge from "../shared/ui/Badge";
 
 
@@ -17,20 +14,19 @@ type BodyTableProps = {
   isLoadingSendInvitation: boolean;
   onRowClick?: (id: string) => void;
   handleClickInviteButton: (id: string) => void;
+  selectedDevice?: TDevice | null;
 };
 
 export const BodyTableDevices = ({
   rows,
   isPagination,
   handleRowClick,
+  selectedDevice,
 }: BodyTableProps): JSX.Element => {
   const baseCellClassName = cn(
     "p-[12px] typo-body-small-deviceium-14 text-black text-sm text-primary-light",
     "align-middle min-w-0",
   );
-  const {
-    selectedDevice
-  } = useDevices()
   return (
     <>
       {rows.map((device, index) => {

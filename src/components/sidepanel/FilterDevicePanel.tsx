@@ -18,17 +18,21 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
     const {
         deviceModels,
         deviceManufacturers,
+        filters,
         fetchModels,
         fetchManufacturers,
-        updateFilters
+        updateFilters,
+        resetFilters
     } = useDevices()
 
     const { t } = useTranslation()
     const i18nDeviceDirectory = (key: string): string =>
         t(`device-directory.${key}`)
-    const [selectedModels, setSelectedModels] = useState<string[]>([]);
-    const [selectedManufacturers, setSelectedManufactureres] = useState<string[]>([]);
-    const [selectedStatuses, setSelectedStatus] = useState<string[]>([]);
+    
+    // Initialize from current filters
+    const [selectedModels, setSelectedModels] = useState<string[]>(filters.models || []);
+    const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>(filters.manufacturers || []);
+    const [selectedStatuses, setSelectedStatuses] = useState<string[]>(filters.statuses || []);
 
     const statuses = [
         { id: 'active', label: "Active" },
@@ -36,6 +40,14 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
         { id: "inactive", label: "Inactive" },
         { id: "maintenance", label: "Maintenance" }
     ]
+    
+    // Update local state when filters change externally
+    useEffect(() => {
+        setSelectedModels(filters.models || []);
+        setSelectedManufacturers(filters.manufacturers || []);
+        setSelectedStatuses(filters.statuses || []);
+    }, [filters.models, filters.manufacturers, filters.statuses]);
+    
     useEffect(() => {
         if (isOpen) {
             fetchManufacturers()
@@ -43,13 +55,37 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
         }
     }, [isOpen])
     
-    useEffect(() => {
+    const handleModelChange = (value: string[]) => {
+        setSelectedModels(value);
         updateFilters({
-            manufacturers: selectedManufacturers,
-            models: selectedModels,
-            statuses: selectedStatuses
+            models: value.length > 0 ? value : undefined,
+            offset: 0
         });
-    }, [selectedModels, selectedManufacturers, selectedStatuses]);
+    };
+
+    const handleManufacturerChange = (value: string[]) => {
+        setSelectedManufacturers(value);
+        updateFilters({
+            manufacturers: value.length > 0 ? value : undefined,
+            offset: 0
+        });
+    };
+
+    const handleStatusChange = (value: string[]) => {
+        setSelectedStatuses(value);
+        updateFilters({
+            statuses: value.length > 0 ? value : undefined,
+            offset: 0
+        });
+    };
+
+    const handleClearFilters = () => {
+        setSelectedModels([]);
+        setSelectedManufacturers([]);
+        setSelectedStatuses([]);
+        resetFilters();
+    };
+    
     return (
         <>
 
@@ -67,12 +103,23 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
                                 {i18nDeviceDirectory('filters')}
                             </h2>
                             <p className="text-sm text-gray-600 font-montserrat">
+                                Filter devices by model, manufacturer, or status
                             </p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-
+                        <button
+                            onClick={handleClearFilters}
+                            className="p-2 text-gray-400 flex items-center justify-center border hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
+                        >
+                            <IconMaterial
+                                filled
+                                icon="clear_all"
+                                className="cursor-pointer"
+                                size={20}
+                            />
+                        </button>
                         <div
                             className="p-2 text-gray-400 flex items-center justify-center border  hover:text-gray-600 transition-colors rounded-lg hover:bg-gray-100"
                         >
@@ -94,7 +141,7 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
                         required
                         placeholder={i18nDeviceDirectory('select-model')}
                         value={selectedModels}
-                        onChange={(value) => setSelectedModels(value as string[])}
+                        onChange={handleModelChange}
                         options={deviceModels}
                     />
                     <p>{i18nDeviceDirectory('by-manufacturer')}</p>
@@ -104,7 +151,7 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
                         required
                         multiSelect
                         placeholder={i18nDeviceDirectory('select-type')}
-                        onChange={(vale) => setSelectedManufactureres(vale as string[])}
+                        onChange={handleManufacturerChange}
                         value={selectedManufacturers}
                         options={deviceManufacturers}
                     />
@@ -115,7 +162,7 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
                         required
                         multiSelect
                         placeholder={i18nDeviceDirectory('select-status')}
-                        onChange={(value) => setSelectedStatus(value as string[])}
+                        onChange={handleStatusChange}
                         value={selectedStatuses}
                         options={statuses}
                     />

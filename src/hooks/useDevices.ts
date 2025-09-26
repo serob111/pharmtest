@@ -46,9 +46,16 @@ export function useDevices() {
   );
 
   const updateFilters = useCallback((newFilters: Partial<DeviceFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters(prev => {
+      const updated = { ...prev, ...newFilters };
+      console.log('Updating device filters:', updated);
+      return updated;
+    });
   }, []);
 
+  const resetFilters = useCallback(() => {
+    setFilters({ limit: 10, offset: 0 });
+  }, []);
   const getDeviceDetail = useCallback(async (id: number) => {
     try {
       const detail = await DeviceService.getDeviceDetail(id);
@@ -176,6 +183,7 @@ export function useDevices() {
     deviceEvents,
     deviceMessages,
     alertMsgs,
+    filters,
 
     // Loading states
     devicesLoading,
@@ -186,6 +194,7 @@ export function useDevices() {
     setSelectedDevice,
     setDeviceDetail,
     updateFilters,
+    resetFilters,
     getDeviceDetail,
     getConnectionSettings,
     updateConnectionSettings,

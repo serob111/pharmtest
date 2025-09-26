@@ -17,6 +17,7 @@ type TableDeviceProps = {
   setOffset: (offset: number) => void;
   handleSort?: (field: keyof TDevice) => void;
   handleRowClick: (device: TDevice) => void
+  selectedDevice?: TDevice | null;
 };
 
 export const TableDevice = ({
@@ -25,6 +26,7 @@ export const TableDevice = ({
   offset,
   filterNotFound,
   handleRowClick,
+  selectedDevice,
   setLimit,
   setOffset,
   handleSort,
@@ -98,6 +100,7 @@ export const TableDevice = ({
         ) : (
           <BodyTableDevices
             handleRowClick={handleRowClick}
+            selectedDevice={selectedDevice}
             rows={devicesList.results}
             isPagination={isPagination}
             isLoadingSendInvitation={false}

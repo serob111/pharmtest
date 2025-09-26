@@ -1,6 +1,6 @@
 import Card from "../../../components/card/Card";
 import Button from "../../../components/shared/ui/Button/baseBtn";
-import { useDevices } from "../../../context/DeviceProvider";
+import { useDevices } from "../../../hooks/useDevices";
 
 export default function DevaiceDetails({
     openDeleteModal,
@@ -9,13 +9,17 @@ export default function DevaiceDetails({
     openConectionSettings: () => void,
     openDeleteModal: () => void
 }) {
-    const { deviceDetail, pingDevice } = useDevices()
+    const { deviceDetail, selectedDevice, pingDevice } = useDevices()
 
     const handlePing = () => {
-        if (deviceDetail?.id) {
-            pingDevice(deviceDetail?.id)
+        if (selectedDevice?.id) {
+            pingDevice(selectedDevice.id)
         }
     }
+    
+    // Use deviceDetail if available, otherwise fall back to selectedDevice
+    const device = deviceDetail || selectedDevice;
+    
     return (
         <>
             <div className=" h-full flex flex-col justify-between ">
@@ -26,27 +30,27 @@ export default function DevaiceDetails({
                         items={
                             [{
                                 label: 'name',
-                                value: deviceDetail?.name
+                                value: device?.name
                             },
                             {
                                 label: 'Manufacturer',
-                                value: deviceDetail?.manufacturer
+                                value: device?.manufacturer
                             },
                             {
                                 label: "Model",
-                                value: deviceDetail?.model
+                                value: device?.model
                             },
                             {
                                 label: "Location",
-                                value: deviceDetail?.department
+                                value: device?.department
                             },
                             {
                                 label: 'Date Added',
-                                value: deviceDetail?.created_stamp,
+                                value: device?.created_stamp,
                             },
                             {
                                 label: 'Added by',
-                                value: deviceDetail?.added_by,
+                                value: device?.added_by,
                             }
                             ]}
                     />
@@ -59,27 +63,27 @@ export default function DevaiceDetails({
                         items={
                             [{
                                 label: 'IP Address',
-                                value: deviceDetail?.config?.ip_address
+                                value: device?.config?.ip_address
                             },
                             {
                                 label: 'Port Number',
-                                value: deviceDetail?.config?.port
+                                value: device?.config?.port
                             },
                             {
                                 label: "Device Protocol",
-                                value: deviceDetail?.config?.protocol
+                                value: device?.config?.protocol
                             },
                             {
                                 label: "Last Health Check",
-                                value: deviceDetail?.last_health_check
+                                value: device?.last_health_check
                             },
                             {
                                 label: 'Last Status Update',
-                                value: deviceDetail?.config?.applied_at
+                                value: device?.config?.applied_at
                             },
                             {
                                 label: 'Status',
-                                value: deviceDetail?.status,
+                                value: device?.status,
                             }
                             ]}
                     />

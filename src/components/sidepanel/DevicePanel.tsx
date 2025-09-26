@@ -6,7 +6,7 @@ import Modal from '../modal/Modal';
 import Button from '../shared/ui/Button/baseBtn';
 import { useTranslation } from 'react-i18next';
 import UpdateConnectionSettingsModal from '../connection-settings-modal/UpdateConnectionSettingsModal';
-import { useLocation, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 
 export interface DevicePanelProps {
   isOpen: boolean;
@@ -27,14 +27,12 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
     getDeviceDetail,
     deactivateDevice,
     deviceDetail,
-    setDeviceDetail,
   } = useDevices()
 
   useEffect(() => {
-    if (selectedDevice) {
+    if (selectedDevice?.id) {
+      console.log('Fetching device detail for:', selectedDevice.id);
       getDeviceDetail(selectedDevice.id)
-    } else {
-      setDeviceDetail(null);
     }
   }, [selectedDevice?.id])
 
@@ -45,8 +43,8 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
     setIsOpenDeleteModal(true)
   }
   const handleSave = () => {
-    if (deviceDetail?.id) {
-      deactivateDevice(deviceDetail.id)
+    if (selectedDevice?.id) {
+      deactivateDevice(selectedDevice.id)
       setIsOpenDeleteModal(false)
     }
   }

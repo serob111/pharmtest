@@ -43,9 +43,16 @@ export function useMeds() {
   );
 
   const updateFilters = useCallback((newFilters: Partial<MedFilters>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters(prev => {
+      const updated = { ...prev, ...newFilters };
+      console.log('Updating med filters:', updated);
+      return updated;
+    });
   }, []);
 
+  const resetFilters = useCallback(() => {
+    setFilters({ limit: 10, offset: 0 });
+  }, []);
   const getDrugDetail = useCallback(async (id: string) => {
     try {
       const detail = await MedService.getMedDetail(id);
@@ -83,6 +90,7 @@ export function useMeds() {
     selectedMed,
     drugDetail,
     alertMsgs,
+    filters,
 
     // Loading states
     medsLoading,
@@ -93,6 +101,7 @@ export function useMeds() {
     setSelectedMed,
     setDrugDetail,
     updateFilters,
+    resetFilters,
     getDrugDetail,
     editDrug,
     fetchIngredients,
