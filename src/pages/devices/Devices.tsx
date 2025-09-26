@@ -14,12 +14,11 @@ import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
 
 export default function Devices() {
     const {
+        devicesList,
         limit,
         offset,
-        devicesList,
         selectedDevice,
         devicesLoading,
-        filters,
         setLimit,
         setSelectedDevice,
         setOffset,
@@ -47,12 +46,11 @@ export default function Devices() {
 
     // Handle search when debounced value changes
     useEffect(() => {
-        console.log('Search effect triggered:', debouncedSearch);
         updateFilters({ 
             search: debouncedSearch || undefined,
             offset: 0 
         });
-    }, [debouncedSearch]);
+    }, [debouncedSearch, updateFilters]);
 
     const handleSort = (field: keyof TDevice) => {
         setSortConfig((prev) => {
@@ -87,7 +85,6 @@ export default function Devices() {
     }, [devicesList, sortConfig]);
 
     const handleRowClick = (device: TDevice) => {
-        console.log('Device selected:', device);
         setSelectedDevice(device);
         setIsDevicePanelOpen(true);
     };
@@ -97,7 +94,6 @@ export default function Devices() {
     };
 
     const handleSearch = (value: string) => {
-        console.log('Search input changed:', value);
         setSearchValue(value);
     };
 

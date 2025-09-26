@@ -13,12 +13,11 @@ import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
 
 export default function MedicationDirectory() {
   const {
+    medsList,
     limit,
     offset,
-    medsList,
-    medsLoading,
     selectedMed,
-    filters,
+    medsLoading,
     setLimit,
     setSelectedMed,
     setOffset,
@@ -46,12 +45,11 @@ export default function MedicationDirectory() {
 
   // Handle search when debounced value changes
   useEffect(() => {
-    console.log('Search effect triggered:', debouncedSearch);
     updateFilters({ 
       search: debouncedSearch || undefined,
       offset: 0
     });
-  }, [debouncedSearch]);
+  }, [debouncedSearch, updateFilters]);
 
   const handleSort = (field: keyof TMed) => {
     setSortConfig((prev) => {
@@ -86,19 +84,16 @@ export default function MedicationDirectory() {
   }, [medsList, sortConfig]);
 
   const handleRowClick = (med: TMed) => {
-    console.log('Med selected:', med);
     setSelectedMed(med);
     setIsPanelOpen(true);
   };
 
   const handleSearch = (value: string) => {
-    console.log('Search input changed:', value);
     setSearchValue(value);
   };
 
   const toggleKiro = () => {
     const newUseInKiro = !useInKiro;
-    console.log('KIRO filter changed:', newUseInKiro);
     setUseInKiro(newUseInKiro);
     updateFilters({ 
       useInKiro: newUseInKiro,

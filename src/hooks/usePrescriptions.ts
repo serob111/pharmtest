@@ -8,12 +8,10 @@ export function usePrescriptions() {
   const [prescriptionDetail, setPrescriptionDetail] = useState<TPrescription | null>(null);
   const [alertMsgs, setAlertMsgs] = useState<Partial<Record<string, string[]>>>({});
 
-  // Prescriptions list with filters
   const [filters, setFilters] = useState<PrescriptionFilters>({ limit: 10, offset: 0 });
   const {
     data: prescriptionsList,
     loading: prescriptionsLoading,
-    error: prescriptionsError,
     execute: refetchPrescriptions
   } = useAsync(
     () => PrescriptionService.getPrescriptions(filters),
@@ -68,16 +66,13 @@ export function usePrescriptions() {
   }, [refetchPrescriptions]);
 
   return {
-    // Data
     prescriptionsList: prescriptionsList || { count: 0, results: [] },
     selectedPrescription,
     prescriptionDetail,
     alertMsgs,
 
-    // Loading states
     prescriptionsLoading,
 
-    // Actions
     setSelectedPrescription,
     updateFilters,
     getPrescriptionDetail,
@@ -87,7 +82,6 @@ export function usePrescriptions() {
     refetchPrescriptions,
     setAlertMsgs,
 
-    // Pagination helpers
     setLimit: (limit: number) => updateFilters({ limit, offset: 0 }),
     setOffset: (offset: number) => updateFilters({ offset }),
     limit: filters.limit || 10,

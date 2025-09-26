@@ -8,12 +8,17 @@ import { useUsers } from "../../hooks/useUsers";
 import UpdateRoleModal from "../../components/update-modal/UpdateRoleModal";
 import Alert, { AlertType } from "../../components/alert/Alert";
 import LoadingSpinner from "../../components/shared/ui/LoadingSpinner";
+import { TUser } from "../../types/userTypes";
 
-export default function UserPage() {
+interface UserPageProps {
+  selectedUser: TUser;
+  setSelectedUser: (user: TUser) => void;
+}
+
+export default function UserPage({ selectedUser, setSelectedUser }: UserPageProps) {
   const { t } = useTranslation()
   const i18nUsersTable = (key: string): string =>
     t(`users.table.header.${key}`);
-  const { selectedProfile } = useUsers()
   const [showUpdateNameModal, setShowUpdateNameModal] = useState(false);
   const [showUpdatePhoneModal, setShowUpdatePhoneModal] = useState(false);
   const [showUpdateRoleModal, setShowUpdateRoleModal] = useState(false);
@@ -25,39 +30,36 @@ export default function UserPage() {
     updateUserStatus,
     updateUserRole
   } = useUsers()
+  
   const profileItems = [
     {
       id: "email",
       label: "E-Mail Address",
       icon: "email",
-      value: selectedProfile.email,
+      value: selectedUser.email,
       editable: false
     },
     {
       id: "fullName",
       label: 'Full Name',
       icon: "person",
-      value: `${selectedProfile.first_name} ${selectedProfile.last_name}`,
+      value: `${selectedUser.first_name} ${selectedUser.last_name}`,
       editable: true,
       onChange: () => setShowUpdateNameModal(true),
-
     },
-
-
     {
       id: "phone",
       label: i18nUsersTable("phone"),
       icon: "phone_enabled",
-      value: selectedProfile.phone,
+      value: selectedUser.phone,
       editable: true,
       onChange: () => setShowUpdatePhoneModal(true),
-
     },
     {
       id: "role",
       label: i18nUsersTable("role"),
       icon: "gpp_good",
-      value: selectedProfile.clinic_role,
+      value: selectedUser.clinic_role,
       editable: true,
       onChange: () => setShowUpdateRoleModal(true),
     },
@@ -65,49 +67,66 @@ export default function UserPage() {
       id: "status",
       label: i18nUsersTable("status"),
       icon: "sync",
-      value: selectedProfile.is_active ? 'Active' : 'Deactivated',
+      value: selectedUser.is_active ? 'Active' : 'Deactivated',
       editable: true,
       onChange: () => handleStatus(),
     }
   ];
+  
   const handleSaveUserName = async (firstName: string, lastName: string) => {
-    updateUserFullName({ id: selectedProfile.id, firstName, lastName })
+    const updated = await updateUserFullName({ id: selectedUser.id, firstName, lastName });
+    if (updated) {
+      setSelectedUser(updated);
+    }
   };
+  
   const handleSaveUserPhone = async (phone: string) => {
-    updateUserPhoneNumber({ id: selectedProfile.id, phone })
+    const updated = await updateUserPhoneNumber({ id: selectedUser.id, phone });
+    if (updated) {
+      setSelectedUser(updated);
+    }
   };
+  
   const handleSaveRole = async (role: string | number) => {
-    updateUserRole({ id: selectedProfile.id, role })
+    const updated = await updateUserRole({ id: selectedUser.id, role });
+    if (updated) {
+      setSelectedUser(updated);
+    }
   };
+  
   const handleStatus = async () => {
-    updateUserStatus({ id: selectedProfile.id, status: !selectedProfile.is_active })
+    const updated = await updateUserStatus({ id: selectedUser.id });
+    if (updated) {
+      setSelectedUser(updated);
+    }
   };
+
   return (
     <div>
       <Header
-        title={`${selectedProfile.first_name} ${selectedProfile.last_name}`}
-        crumbs={[{ path: '/users/', name: `${t('users.users')}` }, { name: `${selectedProfile.first_name} ${selectedProfile.last_name}` }]}
+        title={`${selectedUser.first_name} ${selectedUser.last_name}`}
+        crumbs={[{ path: '/users/', name: `${t('users.users')}` }, { name: `${selectedUser.first_name} ${selectedUser.last_name}` }]}
       />
    
-        <Alert type={AlertType.Error} alertMsgs={alertMsgs} />
+      <Alert type={AlertType.Error} alertMsgs={alertMsgs} />
       
       <UpdateNameModal
         isOpen={showUpdateNameModal}
         onClose={() => setShowUpdateNameModal(false)}
-        currentFirstName={selectedProfile.first_name || ''}
-        currentLastName={selectedProfile.last_name || ''}
+        currentFirstName={selectedUser.first_name || ''}
+        currentLastName={selectedUser.last_name || ''}
         onSave={handleSaveUserName}
       />
       <UpdatePhoneModal
         isOpen={showUpdatePhoneModal}
         onClose={() => setShowUpdatePhoneModal(false)}
-        currentPhone={selectedProfile.phone || ''}
+        currentPhone={selectedUser.phone || ''}
         onSave={handleSaveUserPhone}
       />
       <UpdateRoleModal
         isOpen={showUpdateRoleModal}
         onClose={() => setShowUpdateRoleModal(false)}
-        currentRole={selectedProfile.clinic_role}
+        currentRole={selectedUser.clinic_role}
         onSave={handleSaveRole}
       />
       

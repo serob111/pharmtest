@@ -1,7 +1,6 @@
 import type { JSX } from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router";
 import { Table } from "../../components/table/Table";
 import { PaginationTable } from "../../components/table/PaginationTable";
 import { BodyTableUsers } from "./BodyTableUsers";
@@ -14,6 +13,7 @@ type TableUsersProps = {
   offset: number;
   setOffset: (offset: number) => void;
   handleSort?: (field: keyof TUser) => void;
+  rowClick: (user: TUser) => void;
 };
 
 export const TableUsers = ({
@@ -23,6 +23,7 @@ export const TableUsers = ({
   setLimit,
   setOffset,
   handleSort,
+  rowClick,
 }: TableUsersProps): JSX.Element => {
   const { t } = useTranslation();
   const i18nUsersTable = (key: string): string =>
@@ -37,7 +38,6 @@ export const TableUsers = ({
       icon: "swap_vert",
       onclick: () => handleSort?.('first_name'),
     },
-
     {
       id: "email",
       label: i18nUsersTable("email"),
@@ -66,14 +66,11 @@ export const TableUsers = ({
       style: {
         width: "60px",
       },
-      // onclick: ()=>handleSort,
     },
   ];
 
-
   return (
     <div className="relative">
-
       <Table columns={columns}>
         {usersList.count === 0 ? (
           <tr>
@@ -87,7 +84,7 @@ export const TableUsers = ({
             isPagination={isPagination}
             isLoadingSendInvitation={false}
             handleClickInviteButton={() => { }}
-
+            rowClick={rowClick}
           />
         )}
       </Table>

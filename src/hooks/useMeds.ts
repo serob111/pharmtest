@@ -1,77 +1,51 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { MedService, MedFilters } from '../services/medService';
 import { TMed, TMedsList, TKiroDetail } from '../types/medTypes';
+import { useAsync } from './useAsync';
 
 export function useMeds() {
-  const [medsList, setMedsList] = useState<TMedsList>({ count: 0, results: [] });
-  const [medsLoading, setMedsLoading] = useState(false);
   const [selectedMed, setSelectedMed] = useState<TMed | null>(null);
   const [drugDetail, setDrugDetail] = useState<TMed | null>(null);
   const [activeIngredients, setActiveIngredients] = useState<any[]>([]);
   const [dosageUnits, setDosageUnits] = useState<any[]>([]);
-  const [ingredientsLoading, setIngredientsLoading] = useState(false);
-  const [unitsLoading, setUnitsLoading] = useState(false);
   const [alertMsgs, setAlertMsgs] = useState<Record<string, string[]>>({});
+
   const [filters, setFilters] = useState<MedFilters>({ limit: 10, offset: 0 });
+  const {
+    data: medsList,
+    loading: medsLoading,
+    execute: refetchMeds
+  } = useAsync(
+    () => MedService.getMeds(filters),
+    [filters]
+  );
 
-  // Fetch meds function
-  const fetchMeds = useCallback(async (filterParams: MedFilters) => {
-    setMedsLoading(true);
-    try {
-      console.log('Fetching meds with filters:', filterParams);
-      const data = await MedService.getMeds(filterParams);
-      console.log('Received meds data:', data);
-      setMedsList(data);
-    } catch (error) {
-      console.error('Error fetching meds:', error);
-      setMedsList({ count: 0, results: [] });
-    } finally {
-      setMedsLoading(false);
-    }
-  }, []);
+  const {
+    data: ingredientsData,
+    loading: ingredientsLoading,
+    execute: fetchIngredients
+  } = useAsync(
+    () => MedService.getActiveIngredients(),
+    [],
+    { immediate: false }
+  );
 
-  // Update filters and fetch data
+  const {
+    data: unitsData,
+    loading: unitsLoading,
+    execute: fetchUnits
+  } = useAsync(
+    () => MedService.getDosageUnits(),
+    [],
+    { immediate: false }
+  );
+
   const updateFilters = useCallback((newFilters: Partial<MedFilters>) => {
-    const updatedFilters = { ...filters, ...newFilters };
-    console.log('Updating med filters from:', filters, 'to:', updatedFilters);
-    setFilters(updatedFilters);
-    fetchMeds(updatedFilters);
-  }, [filters, fetchMeds]);
-
-  // Reset filters
-  const resetFilters = useCallback(() => {
-    const defaultFilters = { limit: 10, offset: 0 };
-    setFilters(defaultFilters);
-    fetchMeds(defaultFilters);
-  }, [fetchMeds]);
-
-  // Initial load
-  useEffect(() => {
-    fetchMeds(filters);
-  }, []); // Only run once on mount
-
-  const fetchIngredients = useCallback(async () => {
-    setIngredientsLoading(true);
-    try {
-      const data = await MedService.getActiveIngredients();
-      setActiveIngredients(data.results || []);
-    } catch (error) {
-      console.error('Error fetching ingredients:', error);
-    } finally {
-      setIngredientsLoading(false);
-    }
+    setFilters(prev => ({ ...prev, ...newFilters }));
   }, []);
 
-  const fetchUnits = useCallback(async () => {
-    setUnitsLoading(true);
-    try {
-      const data = await MedService.getDosageUnits();
-      setDosageUnits(data.results || []);
-    } catch (error) {
-      console.error('Error fetching units:', error);
-    } finally {
-      setUnitsLoading(false);
-    }
+  const resetFilters = useCallback(() => {
+    setFilters({ limit: 10, offset: 0 });
   }, []);
 
   const getDrugDetail = useCallback(async (id: string) => {
@@ -102,9 +76,21 @@ export function useMeds() {
     setDrugDetail(null);
   }, []);
 
+  // Update local state when async data changes
+  useCallback(() => {
+    if (ingredientsData) {
+      setActiveIngredients(ingredientsData.results || []);
+    }
+  }, [ingredientsData]);
+
+  useCallback(() => {
+    if (unitsData) {
+      setDosageUnits(unitsData.results || []);
+    }
+  }, [unitsData]);
+
   return {
-    // Data
-    medsList,
+    medsList: medsList || { count: 0, results: [] },
     activeIngredients,
     dosageUnits,
     selectedMed,
@@ -112,12 +98,10 @@ export function useMeds() {
     alertMsgs,
     filters,
 
-    // Loading states
     medsLoading,
     ingredientsLoading,
     unitsLoading,
 
-    // Actions
     setSelectedMed,
     setDrugDetail,
     updateFilters,
@@ -126,11 +110,10 @@ export function useMeds() {
     editDrug,
     fetchIngredients,
     fetchUnits,
-    fetchMeds,
+    refetchMeds,
     setAlertMsgs,
     clearSelection,
 
-    // Pagination helpers
     setLimit: (limit: number) => updateFilters({ limit, offset: 0 }),
     setOffset: (offset: number) => updateFilters({ offset }),
     limit: filters.limit || 10,

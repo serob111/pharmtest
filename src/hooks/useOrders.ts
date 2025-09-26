@@ -10,19 +10,16 @@ export function useOrders() {
   const [orderDetail, setOrderDetail] = useState<TOrder | null>(null);
   const [alertMsgs, setAlertMsgs] = useState<AlertState | null>(null);
 
-  // Orders list with filters
   const [filters, setFilters] = useState<OrderFilters>({ limit: 10, offset: 0 });
   const {
     data: ordersList,
     loading: ordersLoading,
-    error: ordersError,
     execute: refetchOrders
   } = useAsync(
     () => OrderService.getOrders(filters),
     [filters]
   );
 
-  // Dashboard data
   const {
     data: dashboard,
     loading: dashboardLoading,
@@ -113,18 +110,15 @@ export function useOrders() {
   }, [refetchOrders]);
 
   return {
-    // Data
     ordersList: ordersList || { count: 0, results: [] },
     dashboard,
     selectedOrder,
     orderDetail,
     alertMsgs,
 
-    // Loading states
     ordersLoading,
     dashboardLoading,
 
-    // Actions
     setSelectedOrder,
     updateFilters,
     getOrderDetail,
@@ -136,7 +130,6 @@ export function useOrders() {
     refetchDashboard,
     setAlertMsgs,
 
-    // Pagination helpers
     setLimit: (limit: number) => updateFilters({ limit, offset: 0 }),
     setOffset: (offset: number) => updateFilters({ offset }),
     limit: filters.limit || 10,

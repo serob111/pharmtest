@@ -18,7 +18,6 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
     const {
         deviceModels,
         deviceManufacturers,
-        filters,
         fetchModels,
         fetchManufacturers,
         updateFilters,
@@ -29,7 +28,6 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
     const i18nDeviceDirectory = (key: string): string =>
         t(`device-directory.${key}`);
     
-    // Local state for filters
     const [selectedModels, setSelectedModels] = useState<string[]>([]);
     const [selectedManufacturers, setSelectedManufacturers] = useState<string[]>([]);
     const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -41,23 +39,15 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
         { id: "maintenance", label: "Maintenance" }
     ];
     
-    // Initialize local state from current filters
-    useEffect(() => {
-        setSelectedModels(filters.models || []);
-        setSelectedManufacturers(filters.manufacturers || []);
-        setSelectedStatuses(filters.statuses || []);
-    }, [filters]);
-    
     useEffect(() => {
         if (isOpen) {
             fetchManufacturers();
             fetchModels();
         }
-    }, [isOpen]);
+    }, [isOpen, fetchManufacturers, fetchModels]);
     
     const handleModelChange = (value: string | string[]) => {
         const valueArray = Array.isArray(value) ? value : [value];
-        console.log('Model filter changed:', valueArray);
         setSelectedModels(valueArray);
         updateFilters({
             models: valueArray.length > 0 ? valueArray : undefined,
@@ -67,7 +57,6 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
 
     const handleManufacturerChange = (value: string | string[]) => {
         const valueArray = Array.isArray(value) ? value : [value];
-        console.log('Manufacturer filter changed:', valueArray);
         setSelectedManufacturers(valueArray);
         updateFilters({
             manufacturers: valueArray.length > 0 ? valueArray : undefined,
@@ -77,7 +66,6 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
 
     const handleStatusChange = (value: string | string[]) => {
         const valueArray = Array.isArray(value) ? value : [value];
-        console.log('Status filter changed:', valueArray);
         setSelectedStatuses(valueArray);
         updateFilters({
             statuses: valueArray.length > 0 ? valueArray : undefined,
@@ -86,7 +74,6 @@ const FilterDevicePanel: React.FC<FilterDevicePanelProps> = ({
     };
 
     const handleClearFilters = () => {
-        console.log('Clearing all filters');
         setSelectedModels([]);
         setSelectedManufacturers([]);
         setSelectedStatuses([]);
