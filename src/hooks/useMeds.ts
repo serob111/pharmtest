@@ -10,6 +10,7 @@ export function useMeds() {
 
   // Meds list with filters
   const [filters, setFilters] = useState<MedFilters>({ limit: 10, offset: 0 });
+  
   const {
     data: medsList,
     loading: medsLoading,
@@ -17,7 +18,7 @@ export function useMeds() {
     execute: refetchMeds
   } = useAsync(
     () => MedService.getMeds(filters),
-    [filters]
+    [] // Empty dependency array - we'll manually trigger refetch
   );
 
   // Active ingredients
@@ -46,13 +47,30 @@ export function useMeds() {
     setFilters(prev => {
       const updated = { ...prev, ...newFilters };
       console.log('Updating med filters:', updated);
+      
+      // Manually trigger refetch with new filters
+      MedService.getMeds(updated).then(() => {
+        refetchMeds();
+      }).catch(error => {
+        console.error('Error fetching meds:', error);
+      });
+      
       return updated;
     });
-  }, []);
+  }, [refetchMeds]);
 
   const resetFilters = useCallback(() => {
-    setFilters({ limit: 10, offset: 0 });
-  }, []);
+    const defaultFilters = { limit: 10, offset: 0 };
+    setFilters(defaultFilters);
+    
+    // Manually trigger refetch with default filters
+    MedService.getMeds(defaultFilters).then(() => {
+      refetchMeds();
+    }).catch(error => {
+      console.error('Error fetching meds:', error);
+    });
+  }, [refetchMeds]);
+
   const getDrugDetail = useCallback(async (id: string) => {
     try {
       const detail = await MedService.getMedDetail(id);

@@ -11,8 +11,9 @@ export function useDevices() {
   const [deviceMessages, setDeviceMessages] = useState<any[]>([]);
   const [alertMsgs, setAlertMsgs] = useState<Record<string, string[]>>({});
 
-  // Device list with filters
+  // Device list with filters - start with initial filters
   const [filters, setFilters] = useState<DeviceFilters>({ limit: 10, offset: 0 });
+  
   const {
     data: devicesList,
     loading: devicesLoading,
@@ -20,7 +21,7 @@ export function useDevices() {
     execute: refetchDevices
   } = useAsync(
     () => DeviceService.getDevices(filters),
-    [filters]
+    [] // Empty dependency array - we'll manually trigger refetch
   );
 
   // Device models
@@ -49,13 +50,31 @@ export function useDevices() {
     setFilters(prev => {
       const updated = { ...prev, ...newFilters };
       console.log('Updating device filters:', updated);
+      
+      // Manually trigger refetch with new filters
+      DeviceService.getDevices(updated).then(data => {
+        // Update the async state manually
+        refetchDevices();
+      }).catch(error => {
+        console.error('Error fetching devices:', error);
+      });
+      
       return updated;
     });
-  }, []);
+  }, [refetchDevices]);
 
   const resetFilters = useCallback(() => {
-    setFilters({ limit: 10, offset: 0 });
-  }, []);
+    const defaultFilters = { limit: 10, offset: 0 };
+    setFilters(defaultFilters);
+    
+    // Manually trigger refetch with default filters
+    DeviceService.getDevices(defaultFilters).then(() => {
+      refetchDevices();
+    }).catch(error => {
+      console.error('Error fetching devices:', error);
+    });
+  }, [refetchDevices]);
+
   const getDeviceDetail = useCallback(async (id: number) => {
     try {
       const detail = await DeviceService.getDeviceDetail(id);

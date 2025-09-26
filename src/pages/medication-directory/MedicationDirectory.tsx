@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import Header from '../../components/header/Header';
-
 import { useTranslation } from 'react-i18next';
 import Input from '../../components/shared/ui/input/Input';
 import Switch from '../../components/shared/ui/switch/switch';
@@ -25,7 +24,8 @@ export default function MedicationDirectory() {
     setOffset,
     updateFilters,
     resetFilters,
-    clearSelection
+    clearSelection,
+    refetchMeds
   } = useMeds();
   
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -44,6 +44,22 @@ export default function MedicationDirectory() {
     field: null,
     direction: 'asc',
   });
+
+  // Initial data fetch
+  useEffect(() => {
+    refetchMeds();
+  }, []);
+
+  // Handle debounced search
+  useEffect(() => {
+    if (debouncedSearch !== (filters.search || '')) {
+      console.log('Search changed:', debouncedSearch);
+      updateFilters({ 
+        search: debouncedSearch || undefined,
+        offset: 0
+      });
+    }
+  }, [debouncedSearch]);
 
   const handleSort = (field: keyof TMed) => {
     setSortConfig((prev) => {
@@ -75,7 +91,7 @@ export default function MedicationDirectory() {
       ...medsList,
       results: sortedMeds,
     };
-  }, [medsList, sortConfig, offset, limit]);
+  }, [medsList, sortConfig]);
 
   const handleRowClick = (med: TMed) => {
     console.log('Med selected:', med);
@@ -84,9 +100,8 @@ export default function MedicationDirectory() {
   };
 
   const handleSearch = (value: string) => {
-    updateFilters({ offset: 0 });
-    setSearchValue(value)
-  }
+    setSearchValue(value);
+  };
 
   const toggleKiro = () => {
     const newUseInKiro = !useInKiro;
@@ -95,7 +110,7 @@ export default function MedicationDirectory() {
       useInKiro: newUseInKiro,
       offset: 0
     });
-  }
+  };
 
   const handleClosePanel = () => {
     setIsPanelOpen(false);
@@ -112,16 +127,6 @@ export default function MedicationDirectory() {
     setSearchValue('');
     setUseInKiro(false);
   };
-
-  // Update search filter when debounced search changes
-  useEffect(() => {
-    if (debouncedSearch !== filters.search) {
-      updateFilters({ 
-        search: debouncedSearch || undefined,
-        offset: 0
-      });
-    }
-  }, [debouncedSearch]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">

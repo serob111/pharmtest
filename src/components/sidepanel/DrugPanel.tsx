@@ -35,6 +35,7 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
       setDrugDetail(null);
     }
   }, [selectedMed?.id])
+  
   const { t } = useTranslation()
   const i18nMedDirectory = (key: string): string =>
     t(`med-directory.${key}`);
@@ -43,6 +44,9 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
   if (!selectedMed) {
     return null;
   }
+
+  // Use drugDetail if available, otherwise fall back to selectedMed
+  const displayData = drugDetail || selectedMed;
 
   return (
     <>
@@ -67,12 +71,12 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
             <div>
               <h2
                 className="text-lg font-semibold text-gray-900 font-montserrat  truncate max-w-[250px]"
-                title={selectedMed?.brand_name}
+                title={displayData?.brand_name}
               >
-                {selectedMed?.brand_name}
+                {displayData?.brand_name}
               </h2>
               <p className="text-sm text-gray-600 font-montserrat">
-                {selectedMed?.active_ingredient}
+                {displayData?.active_ingredient}
               </p>
             </div>
           </div>
@@ -110,30 +114,30 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
             items={[
               {
                 label: i18nMedDirectory('internal-id'),
-                value: drugDetail?.id
+                value: displayData?.id
               },
               {
                 label: i18nMedDirectory('his-id'),
-                value: drugDetail?.his_id
+                value: displayData?.his_id
               },
               {
                 label: i18nMedDirectory('his-system'),
-                value: drugDetail?.his_system
+                value: displayData?.his_system
               },
               {
                 label: i18nMedDirectory("drug-id"),
-                value: drugDetail?.drug_id
+                value: displayData?.drug_id
               },
               {
                 label: i18nMedDirectory('use-in-kiro'),
-                value: drugDetail?.use_in_kiro ? i18nMedDirectory('yes') : i18nMedDirectory('no'),
+                value: displayData?.use_in_kiro ? i18nMedDirectory('yes') : i18nMedDirectory('no'),
                 hasIcon: true,
-                useInKiro: drugDetail?.use_in_kiro
+                useInKiro: displayData?.use_in_kiro
               }
             ]}
           />
 
-          {drugDetail?.use_in_kiro && (
+          {displayData?.use_in_kiro && displayData?.kiro_details && (
             <Card
               titleClass='bg-[#E1F0FB]'
               className='mt-2'
@@ -141,27 +145,27 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
               items={[
                 {
                   label: i18nMedDirectory('ingredient'),
-                  value: drugDetail?.kiro_details.active_ingredient
+                  value: displayData?.kiro_details.active_ingredient
                 },
                 {
                   label: i18nMedDirectory('name'),
-                  value: drugDetail?.kiro_details.name
+                  value: displayData?.kiro_details.name
                 },
                 {
                   label: i18nMedDirectory('volume'),
-                  value: drugDetail?.kiro_details.volume
+                  value: displayData?.kiro_details.volume
                 },
                 {
                   label: i18nMedDirectory('concentration'),
-                  value: drugDetail?.kiro_details.concentration + '/' + drugDetail?.kiro_details.concentration_unit
+                  value: displayData?.kiro_details.concentration + '/' + displayData?.kiro_details.concentration_unit
                 },
                 {
-                  value: drugDetail?.kiro_details.vial_dose + '/' + drugDetail?.kiro_details.vial_unit,
+                  value: displayData?.kiro_details.vial_dose + '/' + displayData?.kiro_details.vial_unit,
                   label: i18nMedDirectory('dose')
                 },
                 {
                   label: i18nMedDirectory('density'),
-                  value: drugDetail?.kiro_details.density ? drugDetail?.kiro_details.density + '(g/mL)' : null
+                  value: displayData?.kiro_details.density ? displayData?.kiro_details.density + '(g/mL)' : null
                 }
               ]}
             />
@@ -173,15 +177,15 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
             items={[
               {
                 label: i18nMedDirectory('brand-name-ru'),
-                value: drugDetail?.brand_name_ru
+                value: displayData?.brand_name_ru
               },
               {
                 label: i18nMedDirectory('brand-name-kz'),
-                value: drugDetail?.brand_name_kz
+                value: displayData?.brand_name_kz
               },
               {
                 label: i18nMedDirectory('active-ingredient'),
-                value: drugDetail?.active_ingredient
+                value: displayData?.active_ingredient
               }
             ]}
           />
@@ -192,19 +196,19 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
             items={[
               {
                 label: i18nMedDirectory('dosage'),
-                value: drugDetail?.dosage_value
+                value: displayData?.dosage_value
               },
               {
                 label: i18nMedDirectory('dosage-unit'),
-                value: drugDetail?.dosage_unit
+                value: displayData?.dosage_unit
               },
               {
                 label: i18nMedDirectory('his-concentration'),
-                value: drugDetail?.damumed_concentration
+                value: displayData?.damumed_concentration
               },
               {
                 label: i18nMedDirectory('route'),
-                value: drugDetail?.route
+                value: displayData?.route
               }
             ]}
           />
@@ -215,11 +219,11 @@ const DrugPanel: React.FC<DrugPanelProps> = ({
             items={[
               {
                 label: i18nMedDirectory('manufacture'),
-                value: drugDetail?.manufacture
+                value: displayData?.manufacture
               },
               {
                 label: i18nMedDirectory('country'),
-                value: drugDetail?.country
+                value: displayData?.country
               }
             ]}
           />
