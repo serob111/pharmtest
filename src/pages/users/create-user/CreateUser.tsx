@@ -7,10 +7,9 @@ import PasswordStrengthIndicator from "../../../components/shared/ui/input/Passw
 import CheckboxInput from "../../../components/shared/ui/input/CheckBoxInput";
 import Header from "../../../components/header/Header";
 import Alert, { AlertType } from "../../../components/alert/Alert";
-import { useUsers } from "../../../hooks/useUsers";
+import { useUsers } from "../../../context/UsersProvider";
 import { generateSecurePassword } from "../../../lib/utils";
 import Button from "../../../components/shared/ui/Button/baseBtn";
-import LoadingSpinner from "../../../components/shared/ui/LoadingSpinner";
 
 export default function CreateUser() {
   const { t } = useTranslation();
@@ -26,41 +25,30 @@ export default function CreateUser() {
   const [confirm_password, setConfirmPassword] = useState("");
   const [validPassword, setIsValid] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const { createUser, alertMsgs, roles, rolesLoading, fetchRoles } = useUsers();
-  
+  const { CreateUser, alertMsgs } = useUsers()
+  const { getRoles, roles } = useUsers()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
-    setIsCreating(true);
-    
-    try {
-      await createUser({
-        first_name,
-        last_name,
-        email,
-        phone,
-        clinic_role,
-        password,
-        confirm_password
-      });
-      window.location.assign('/users');
-    } catch (error) {
-      // Error handling is done in the hook
-    } finally {
-      setIsCreating(false);
-    }
+    CreateUser({
+      first_name,
+      last_name,
+      email,
+      phone,
+      clinic_role,
+      password,
+      confirm_password
+    })
   };
-  
   const handleGeneratePassword = () => {
     const newPassword = generateSecurePassword();
     setPassword(newPassword);
     setConfirmPassword(newPassword);
   };
   useEffect(() => {
-    fetchRoles();
+    getRoles()
   }, [])
-  
+  console.log(alertMsgs)
   return (
     <div className="relative h-screen flex flex-col overflow-x-hidden">
 
@@ -68,13 +56,6 @@ export default function CreateUser() {
         title={i18nCreateUser('create-user')}
         crumbs={[{ path: '/users/', name: i18nCreateUser('users') }, { name: i18nCreateUser('create-user'), path: '' }]}
       />
-      
-      {Object.keys(alertMsgs).length > 0 && (
-        <div className="p-4">
-          <Alert type={AlertType.Error} alertMsgs={alertMsgs} />
-        </div>
-      )}
-      
       <form className="w-full flex flex-col justify-between" onSubmit={handleSubmit}>
         <div className="w-1/2 p-5 flex flex-col gap-5">
           <div className="flex gap-5">
@@ -129,7 +110,6 @@ export default function CreateUser() {
             onChange={(value) => setRole(value as string)}
             value={clinic_role || ''}
             options={roles}
-            disabled={rolesLoading}
           />
 
 
@@ -173,21 +153,17 @@ export default function CreateUser() {
         </div>
 
         <div className="w-full bg-gray-100 p-2 flex items-center gap-4 justify-end">
-          {isCreating && (
-            <LoadingSpinner text="Creating user..." />
-          )}
           <Button
             onClick={() => { window.location.assign('/users') }}
-            type="button" variant="outline" size="md" disabled={isCreating}>
+            type="button" variant="outline" size="md"  >
             {i18nCreateUser('cancel')}
           </Button>
           <Button
-            disabled={!first_name || !last_name || !email || !phone || !clinic_role || !validPassword || confirm_password !== password || isCreating}
+            disabled={!first_name || !last_name || !email || !phone || !clinic_role || !validPassword || confirm_password !== password}
             type="submit"
             size="md"
-            className="bg-primary"
-            loading={isCreating}>
-            {isCreating ? 'Creating...' : i18nCreateUser('create')}
+            className="bg-primary">
+            {i18nCreateUser('create')}
           </Button>
         </div>
       </form>

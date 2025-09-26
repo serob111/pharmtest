@@ -1,16 +1,16 @@
 import { useEffect } from "react";
-import { useDevices } from "../../../hooks/useDevices";
+import { useDevices } from "../../../context/DeviceProvider";
 import Button from "../../../components/shared/ui/Button/baseBtn";
 
 
 function DevicesMessages() {
-    const { getDeviceMessages, selectedDevice, deviceMessages } = useDevices()
+    const { getDevciceLatestMessages, deviceDetail,deviceMessages} = useDevices()
 
     useEffect(() => {
-        if (selectedDevice?.id) {
-            getDeviceMessages(selectedDevice.id)
+        if (deviceDetail?.id) {
+            getDevciceLatestMessages(deviceDetail.id)
         }
-    }, [selectedDevice?.id])
+    }, [deviceDetail?.id])
     return (
         <div className="w-full h-full p-4 bg-white  flex flex-col justify-between items-start gap-4 font-montserrat">
             <div className="w-full max-w-md relative flex flex-col justify-start items-start gap-4">
@@ -24,7 +24,7 @@ function DevicesMessages() {
 
                         <div className="flex-1 max-w-3xl flex flex-col justify-start items-start gap-1">
                             <div className="w-full text-custom-gray text-xs font-medium leading-[18px] break-words">
-                                {item.timestamp || item.created_stamp}
+                                {item.created_stamp}
                             </div>
                             <div className="w-full text-custom-dark text-sm font-normal leading-[22px] break-words">
                                 {item.message_type}

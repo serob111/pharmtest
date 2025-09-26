@@ -3,9 +3,11 @@ import { cn } from "../../lib/utils";
 import { FullNameCeil } from "./FullNameCeil";
 import { TooltipCell } from "../table/TooltipCell";
 import Badge from "../shared/ui/Badge";
-import { TUser } from "../../types/userTypes";
+import { TUser, useUsers } from "../../context/UsersProvider";
 import Button from "../shared/ui/Button/baseBtn";
 import { IconMaterial } from "../shared/iconMaterial/IconMaterial";
+import { useDashboard } from "../../context/DashboardProvider";
+
 
 type BodyTableProps = {
   id?: string | null;
@@ -14,25 +16,23 @@ type BodyTableProps = {
   isLoadingSendInvitation: boolean;
   onRowClick?: (id: string) => void;
   handleClickInviteButton: (id: string) => void;
-  rowClick: (user: TUser) => void;
 };
 
 export const BodyTableUsers = ({
   rows,
   isPagination,
-  rowClick,
 }: BodyTableProps): JSX.Element => {
   const baseCellClassName = cn(
     "p-[12px] typo-body-small-medium-14 text-black text-sm text-primary-light",
     "align-middle min-w-0",
   );
 
+  const { setSelectedProfile } = useUsers()
   const handleSelectUser = (user: TUser) => {
     if (user.is_active) {
-      rowClick(user);
+      setSelectedProfile(user)
     }
   }
-
   return (
     <>
       {rows.map((user, index) => {
@@ -90,6 +90,7 @@ export const BodyTableUsers = ({
             <td
               className={baseCellClassName}
             >
+
               <Badge status={user.is_active} />
             </td>
             <td
@@ -106,6 +107,7 @@ export const BodyTableUsers = ({
               </Button>
             </td>
           </tr>
+
         );
       })}
     </>

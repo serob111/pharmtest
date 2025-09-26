@@ -1,9 +1,10 @@
 import type { JSX } from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import { Table } from "../table/Table";
 import { PaginationTable } from "../table/PaginationTable";
-import { TMed, TMedsList } from "../../types/medTypes";
+import { TMed, TMedsList, useMeds } from "../../context/MedDirProvider";
 import { BodyTableMeds } from "./BodyTableMed";
 import NotMedFound from "./NotMedFound";
 
@@ -16,7 +17,6 @@ type TableMedProps = {
   handleSort?: (field: keyof TMed) => void;
   handleRowClick: (med: TMed) => void
   onEdit?: () => void
-  selectedMed?: TMed | null;
 };
 
 export const TableMed = ({
@@ -25,7 +25,6 @@ export const TableMed = ({
   offset,
   onEdit,
   handleRowClick,
-  selectedMed,
   setLimit,
   setOffset,
   handleSort,
@@ -59,11 +58,15 @@ export const TableMed = ({
 
   ];
 
+  const {
+    loadingMed
+  } = useMeds()
+
   return (
     <div className="relative">
       <div>
         <Table columns={columns}>
-          {medsList.count === 0 ? (
+          {!loadingMed && medsList.count === 0 ? (
             <tr>
               <td colSpan={columns.length} className="text-center py-4">
                 <NotMedFound />
@@ -72,7 +75,6 @@ export const TableMed = ({
           ) : (
             <BodyTableMeds
               handleRowClick={handleRowClick}
-              selectedMed={selectedMed}
               rows={medsList.results}
               isPagination={isPagination}
               isLoadingSendInvitation={false}

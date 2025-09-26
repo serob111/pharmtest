@@ -2,8 +2,7 @@ import { type JSX } from "react";
 import { cn, parseDateString } from "../../lib/utils";
 import { TooltipCell } from "../table/TooltipCell";
 import { IconMaterial } from "../shared/iconMaterial/IconMaterial";
-import { TPrescription } from "../../types/prescriptionTypes";
-import { usePrescriptions } from "../../hooks/usePrescriptions";
+import { TPrescription, usePrescriptions } from "../../context/PrescriptionProvider";
 import Badge from "../shared/ui/Badge";
 
 

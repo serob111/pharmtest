@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Table } from "../table/Table";
 import { PaginationTable } from "../table/PaginationTable";
 import NotDeviceFound from "./NotDeviceFound";
-import { TDevice, TDevicesList } from "../../types/deviceTypes";
+import { TDevice, TDevicesList } from "../../context/DeviceProvider";
 import { BodyTableDevices } from "./BodyTableDevice";
 import NotDeviceFilterFound from "./NotDeviceFilterFound";
 
@@ -17,7 +17,6 @@ type TableDeviceProps = {
   setOffset: (offset: number) => void;
   handleSort?: (field: keyof TDevice) => void;
   handleRowClick: (device: TDevice) => void
-  selectedDevice?: TDevice | null;
 };
 
 export const TableDevice = ({
@@ -26,7 +25,6 @@ export const TableDevice = ({
   offset,
   filterNotFound,
   handleRowClick,
-  selectedDevice,
   setLimit,
   setOffset,
   handleSort,
@@ -100,7 +98,6 @@ export const TableDevice = ({
         ) : (
           <BodyTableDevices
             handleRowClick={handleRowClick}
-            selectedDevice={selectedDevice}
             rows={devicesList.results}
             isPagination={isPagination}
             isLoadingSendInvitation={false}

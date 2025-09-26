@@ -1,6 +1,6 @@
 import Card from "../../../components/card/Card";
 import Button from "../../../components/shared/ui/Button/baseBtn";
-import { useDevices } from "../../../hooks/useDevices";
+import { useDevices } from "../../../context/DeviceProvider";
 
 export default function DevaiceDetails({
     openDeleteModal,
@@ -9,17 +9,13 @@ export default function DevaiceDetails({
     openConectionSettings: () => void,
     openDeleteModal: () => void
 }) {
-    const { deviceDetail, selectedDevice, pingDevice } = useDevices()
+    const { deviceDetail, pingDevice } = useDevices()
 
     const handlePing = () => {
-        if (selectedDevice?.id) {
-            pingDevice(selectedDevice.id)
+        if (deviceDetail?.id) {
+            pingDevice(deviceDetail?.id)
         }
     }
-    
-    // Use deviceDetail if available, otherwise fall back to selectedDevice
-    const device = deviceDetail || selectedDevice;
-    
     return (
         <>
             <div className=" h-full flex flex-col justify-between ">
@@ -30,27 +26,28 @@ export default function DevaiceDetails({
                         items={
                             [{
                                 label: 'name',
-                                value: device?.name
+                                value: deviceDetail?.name
                             },
                             {
                                 label: 'Manufacturer',
-                                value: device?.manufacturer
+                                value: deviceDetail?.manufacturer
                             },
                             {
                                 label: "Model",
-                                value: device?.model
+                                value: deviceDetail?.model
                             },
                             {
                                 label: "Location",
-                                value: device?.department
+                                value: deviceDetail?.department
                             },
                             {
                                 label: 'Date Added',
-                                value: device?.created_stamp,
+                                value: deviceDetail?.created_stamp,
                             },
                             {
                                 label: 'Added by',
-                                value: device?.added_by,
+                                // @ts-ignore
+                                value: deviceDetail?.added_by,
                             }
                             ]}
                     />
@@ -63,27 +60,27 @@ export default function DevaiceDetails({
                         items={
                             [{
                                 label: 'IP Address',
-                                value: device?.config?.ip_address
+                                value: deviceDetail?.config?.ip_address
                             },
                             {
                                 label: 'Port Number',
-                                value: device?.config?.port
+                                value: deviceDetail?.config?.port
                             },
                             {
                                 label: "Device Protocol",
-                                value: device?.config?.protocol
+                                value: deviceDetail?.config?.protocol
                             },
                             {
                                 label: "Last Health Check",
-                                value: device?.last_health_check
+                                value: deviceDetail?.last_health_check
                             },
                             {
                                 label: 'Last Status Update',
-                                value: device?.config?.applied_at
+                                value: deviceDetail?.config?.applied_at
                             },
                             {
                                 label: 'Status',
-                                value: device?.status,
+                                value: deviceDetail?.status,
                             }
                             ]}
                     />

@@ -4,62 +4,58 @@ import ProfileItem from "../../components/table-user/ProfileItem";
 import { useState } from "react";
 import UpdateNameModal from "../../components/update-modal/UpdateNameModal";
 import UpdatePhoneModal from "../../components/update-modal/UpdatePhoneModal";
-import { useUsers } from "../../hooks/useUsers";
+import { useUsers } from "../../context/UsersProvider";
 import UpdateRoleModal from "../../components/update-modal/UpdateRoleModal";
 import Alert, { AlertType } from "../../components/alert/Alert";
-import LoadingSpinner from "../../components/shared/ui/LoadingSpinner";
-import { TUser } from "../../types/userTypes";
 
-interface UserPageProps {
-  selectedUser: TUser;
-  setSelectedUser: (user: TUser) => void;
-}
-
-export default function UserPage({ selectedUser, setSelectedUser }: UserPageProps) {
+export default function UserPage() {
   const { t } = useTranslation()
   const i18nUsersTable = (key: string): string =>
     t(`users.table.header.${key}`);
+  const { selectedProfile } = useUsers()
   const [showUpdateNameModal, setShowUpdateNameModal] = useState(false);
   const [showUpdatePhoneModal, setShowUpdatePhoneModal] = useState(false);
   const [showUpdateRoleModal, setShowUpdateRoleModal] = useState(false);
   const {
     alertMsgs,
-    usersLoading,
     updateUserFullName,
     updateUserPhoneNumber,
     updateUserStatus,
     updateUserRole
   } = useUsers()
-  
   const profileItems = [
     {
       id: "email",
       label: "E-Mail Address",
       icon: "email",
-      value: selectedUser.email,
+      value: selectedProfile.email,
       editable: false
     },
     {
       id: "fullName",
       label: 'Full Name',
       icon: "person",
-      value: `${selectedUser.first_name} ${selectedUser.last_name}`,
+      value: `${selectedProfile.first_name} ${selectedProfile.last_name}`,
       editable: true,
       onChange: () => setShowUpdateNameModal(true),
+
     },
+
+
     {
       id: "phone",
       label: i18nUsersTable("phone"),
       icon: "phone_enabled",
-      value: selectedUser.phone,
+      value: selectedProfile.phone,
       editable: true,
       onChange: () => setShowUpdatePhoneModal(true),
+
     },
     {
       id: "role",
       label: i18nUsersTable("role"),
       icon: "gpp_good",
-      value: selectedUser.clinic_role,
+      value: selectedProfile.clinic_role,
       editable: true,
       onChange: () => setShowUpdateRoleModal(true),
     },
@@ -67,75 +63,51 @@ export default function UserPage({ selectedUser, setSelectedUser }: UserPageProp
       id: "status",
       label: i18nUsersTable("status"),
       icon: "sync",
-      value: selectedUser.is_active ? 'Active' : 'Deactivated',
+      value: selectedProfile.is_active ? 'Active' : 'Deactivated',
       editable: true,
       onChange: () => handleStatus(),
     }
   ];
-  
   const handleSaveUserName = async (firstName: string, lastName: string) => {
-    const updated = await updateUserFullName({ id: selectedUser.id, firstName, lastName });
-    if (updated) {
-      setSelectedUser(updated);
-    }
+    updateUserFullName({ id: selectedProfile.id, firstName, lastName })
   };
-  
   const handleSaveUserPhone = async (phone: string) => {
-    const updated = await updateUserPhoneNumber({ id: selectedUser.id, phone });
-    if (updated) {
-      setSelectedUser(updated);
-    }
+    updateUserPhoneNumber({ id: selectedProfile.id, phone })
   };
-  
   const handleSaveRole = async (role: string | number) => {
-    const updated = await updateUserRole({ id: selectedUser.id, role });
-    if (updated) {
-      setSelectedUser(updated);
-    }
+    updateUserRole({ id: selectedProfile.id, role })
   };
-  
   const handleStatus = async () => {
-    const updated = await updateUserStatus({ id: selectedUser.id });
-    if (updated) {
-      setSelectedUser(updated);
-    }
+    updateUserStatus({ id: selectedProfile.id, status: !selectedProfile.is_active })
   };
-
   return (
     <div>
       <Header
-        title={`${selectedUser.first_name} ${selectedUser.last_name}`}
-        crumbs={[{ path: '/users/', name: `${t('users.users')}` }, { name: `${selectedUser.first_name} ${selectedUser.last_name}` }]}
+        title={`${selectedProfile.first_name} ${selectedProfile.last_name}`}
+        crumbs={[{ path: '/users/', name: `${t('users.users')}` }, { name: `${selectedProfile.first_name} ${selectedProfile.last_name}` }]}
       />
    
-      <Alert type={AlertType.Error} alertMsgs={alertMsgs} />
+        <Alert type={AlertType.Error} alertMsgs={alertMsgs} />
       
       <UpdateNameModal
         isOpen={showUpdateNameModal}
         onClose={() => setShowUpdateNameModal(false)}
-        currentFirstName={selectedUser.first_name || ''}
-        currentLastName={selectedUser.last_name || ''}
+        currentFirstName={selectedProfile.first_name || ''}
+        currentLastName={selectedProfile.last_name || ''}
         onSave={handleSaveUserName}
       />
       <UpdatePhoneModal
         isOpen={showUpdatePhoneModal}
         onClose={() => setShowUpdatePhoneModal(false)}
-        currentPhone={selectedUser.phone || ''}
+        currentPhone={selectedProfile.phone || ''}
         onSave={handleSaveUserPhone}
       />
       <UpdateRoleModal
         isOpen={showUpdateRoleModal}
         onClose={() => setShowUpdateRoleModal(false)}
-        currentRole={selectedUser.clinic_role}
+        currentRole={selectedProfile.clinic_role}
         onSave={handleSaveRole}
       />
-      
-      {usersLoading && (
-        <div className="flex items-center justify-center p-8">
-          <LoadingSpinner text="Updating user..." />
-        </div>
-      )}
-      
       <div className="p-5 flex flex-col w-full">
         {
           profileItems.map((profileItem, index) =>

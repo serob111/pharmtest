@@ -2,40 +2,34 @@ import { useEffect, useMemo, useState } from 'react';
 import Header from '../../components/header/Header';
 import { useTranslation } from 'react-i18next';
 import Input from '../../components/shared/ui/input/Input';
-import { TDevice } from '../../types/deviceTypes';
-import { useDevices } from '../../hooks/useDevices';
+import { TDevice, useDevices } from '../../context/DeviceProvider';
 import { TableDevice } from '../../components/table-device/TableDevice';
 import useDebounce from '../../lib/Debounce';
 import { IconMaterial } from '../../components/shared/iconMaterial/IconMaterial';
 import FilterDevicePanel from '../../components/sidepanel/FilterDevicePanel';
 import DevicePanel from '../../components/sidepanel/DevicePanel';
 import Card from '../../components/card/Card';
-import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
 
 export default function Devices() {
     const {
-        devicesList,
         limit,
         offset,
+        devicesList,
         selectedDevice,
-        devicesLoading,
+        getDeviceList,
         setLimit,
         setSelectedDevice,
         setOffset,
-        updateFilters,
-        resetFilters,
-        clearSelection,
     } = useDevices();
 
-    const [IsFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-    const [IsDevicePanelOpen, setIsDevicePanelOpen] = useState(false);
-    const [gridView, setGridView] = useState(false);
-    const [searchValue, setSearchValue] = useState('');
-    const { t } = useTranslation();
+    const [IsFilterPanelOpen, setIsFilterPanelOpen] = useState(false)
+    const [IsDevicePanelOpen, setIsDevicePanelOpen] = useState(false)
+    const [gridView, setGridView] = useState(false)
+    const [searchValue, setSearchValue] = useState('')
+    const { t } = useTranslation()
     const i18nDeviceDirectory = (key: string): string =>
         t(`device-directory.${key}`);
-    const debouncedSearch = useDebounce(searchValue, 500);
-    
+    const debouncedSearch = useDebounce(searchValue, 500)
     const [sortConfig, setSortConfig] = useState<{
         field: keyof TDevice | null;
         direction: 'asc' | 'desc';
@@ -43,14 +37,6 @@ export default function Devices() {
         field: null,
         direction: 'asc',
     });
-
-    // Handle search when debounced value changes
-    useEffect(() => {
-        updateFilters({ 
-            search: debouncedSearch || undefined,
-            offset: 0 
-        });
-    }, [debouncedSearch, updateFilters]);
 
     const handleSort = (field: keyof TDevice) => {
         setSortConfig((prev) => {
@@ -82,7 +68,7 @@ export default function Devices() {
             ...devicesList,
             results: sortedDevices,
         };
-    }, [devicesList, sortConfig]);
+    }, [devicesList, sortConfig, offset, limit]);
 
     const handleRowClick = (device: TDevice) => {
         setSelectedDevice(device);
@@ -94,27 +80,23 @@ export default function Devices() {
     };
 
     const handleSearch = (value: string) => {
-        setSearchValue(value);
-    };
+        setOffset(0)
+        setSearchValue(value)
+    }
 
-    const handleClosePanels = () => {
-        setIsDevicePanelOpen(false);
-        setIsFilterPanelOpen(false);
-        setTimeout(() => {
-            clearSelection();
-        }, 300);
-    };
-
-    const handleRefresh = () => {
-        setSearchValue('');
-        resetFilters();
-    };
+    useEffect(() => {
+        if (debouncedSearch) {
+            getDeviceList({ search: debouncedSearch });
+        } else {
+            getDeviceList()
+        }
+    }, [debouncedSearch, limit, offset]);
 
     return (
         <div className="h-screen flex flex-col overflow-hidden">
             <div className="flex-shrink-0">
                 <Header
-                    create={'/devices/adding/new'}
+                    create={'/'}
                     title={i18nDeviceDirectory('device-directory')}
                 />
             </div>
@@ -143,7 +125,7 @@ export default function Devices() {
                             <div className='flex gap-2'>
                                 <div
                                     onClick={handleFilterClick}
-                                    className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer rounded-lg"
+                                    className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer  rounded-lg"
                                 >
                                     <IconMaterial
                                         filled
@@ -153,20 +135,9 @@ export default function Devices() {
                                     />
                                     <p className="text-sm text-primary-light">{i18nDeviceDirectory('filters')}</p>
                                 </div>
-                                <div
-                                    onClick={handleRefresh}
-                                    className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer rounded-lg"
-                                >
-                                    <IconMaterial
-                                        filled
-                                        icon="refresh"
-                                        className="cursor-pointer text-primary-light"
-                                        size={15}
-                                    />
-                                </div>
                                 <div className='flex'>
                                     <div
-                                        className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer rounded-l-lg"
+                                        className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer  rounded-l-lg"
                                     >
                                         <IconMaterial
                                             onClick={() => setGridView(false)}
@@ -175,15 +146,15 @@ export default function Devices() {
                                             className={`cursor-pointer ${!gridView ? 'text-primeblue' : 'text-primary-light'}`}
                                             size={15}
                                         />
-                                    </div>  
-                                    <div
-                                        className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer rounded-r-lg"
+                                    </div>  <div
+                                        className="bg-background-light-gray flex items-center justify-center border px-3 py-2 cursor-pointer  rounded-r-lg"
                                     >
                                         <IconMaterial
                                             onClick={() => setGridView(true)}
                                             filled
                                             icon="grid_view"
                                             className={`cursor-pointer ${gridView ? 'text-primeblue' : 'text-primary-light'}`}
+
                                             size={15}
                                         />
                                     </div>
@@ -191,50 +162,44 @@ export default function Devices() {
                             </div>
                         </div>
                     </div>
-                    
-                    {devicesLoading && (
-                        <div className="flex-1 flex items-center justify-center">
-                            <LoadingSpinner size="lg" text="Loading devices..." />
-                        </div>
-                    )}
-                    
-                    {!devicesLoading && gridView ? (
-                        <div className={`grid ${IsFilterPanelOpen || IsDevicePanelOpen ? 'grid-cols-2' : "grid-cols-3"} gap-4 px-4 mt-4 overflow-y-auto`}>
-                            {paginatedDevicesList.results.map((device) => (
-                                <Card
-                                    isActive={selectedDevice?.id === device.id}
-                                    onClick={() => handleRowClick(device)}
-                                    itemsClass='flex px-1 flex-col gap-1 items-start'
-                                    key={device.id}
-                                    className="mt-2 cursor-pointer"
-                                    title={device.name}
-                                    subtitle={device.department}
-                                    status={device.status}
-                                    items={[
-                                        { label: "Manufacturer, Model", value: device?.manufacturer + ',' + device.model },
-                                        { label: "Date Added:", value: device?.created_stamp },
-                                        { label: "Last Health Check:", value: device?.last_health_check },
-                                    ]}
+                    {
+                        gridView ? (
+                            <div className={`grid ${IsFilterPanelOpen || IsDevicePanelOpen ? 'grid-cols-2' : "grid-cols-3"} gap-4 px-4 mt-4 overflow-y-auto`}>
+                                {paginatedDevicesList.results.map((device) => (
+                                    <Card
+                                        isActive={selectedDevice?.id === device.id}
+                                        onClick={() => handleRowClick(device)}
+                                        itemsClass='flex px-1 flex-col gap-1 items-start'
+                                        key={device.id}
+                                        className="mt-2 cursor-pointer"
+                                        title={device.name}
+                                        subtitle={device.department}
+                                        status={device.status}
+                                        items={[
+                                            { label: "Manufacturer, Model", value: device?.manufacturer + ',' + device.model },
+                                            { label: "Date Added:", value: device?.created_stamp },
+                                            { label: "Last Health Check:", value: device?.last_health_check },
+                                        ]}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex-1 mt-4 overflow-auto">
+                                <TableDevice
+                                    filterNotFound={IsFilterPanelOpen}
+                                    offset={offset}
+                                    setOffset={setOffset}
+                                    handleSort={handleSort}
+                                    handleRowClick={handleRowClick}
+                                    setLimit={setLimit}
+                                    devicesList={paginatedDevicesList}
+                                    limit={limit}
                                 />
-                            ))}
-                        </div>
-                    ) : (
-                        !devicesLoading && <div className="flex-1 mt-4 overflow-auto">
-                            <TableDevice
-                                filterNotFound={IsFilterPanelOpen}
-                                selectedDevice={selectedDevice}
-                                offset={offset}
-                                setOffset={setOffset}
-                                handleSort={handleSort}
-                                handleRowClick={handleRowClick}
-                                setLimit={setLimit}
-                                devicesList={paginatedDevicesList}
-                                limit={limit}
-                            />
-                        </div>
-                    )}
+                            </div>
+                        )
+                    }
+
                 </div>
-                
                 <FilterDevicePanel
                     className={`
                         absolute top-0 right-0 h-full w-[450px] bg-white shadow-lg
@@ -242,7 +207,7 @@ export default function Devices() {
                         ${IsFilterPanelOpen ? 'translate-x-0' : 'translate-x-full'}
                     `}
                     isOpen={IsFilterPanelOpen}
-                    onClose={handleClosePanels}
+                    onClose={() => setIsFilterPanelOpen(false)}
                 />
                 <DevicePanel
                     className={`
@@ -251,7 +216,7 @@ export default function Devices() {
                         ${IsDevicePanelOpen ? 'translate-x-0' : 'translate-x-full'}
                     `}
                     isOpen={IsDevicePanelOpen}
-                    onClose={handleClosePanels}
+                    onClose={() => setIsDevicePanelOpen(false)}
                 />
             </div>
         </div>

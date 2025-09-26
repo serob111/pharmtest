@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useMeds } from '../../hooks/useMeds';
+import { useMeds } from '../../context/MedDirProvider';
 import Modal from '../modal/Modal';
 import Button from '../shared/ui/Button/baseBtn';
 import CheckboxInput from '../shared/ui/input/CheckBoxInput';
@@ -49,21 +49,20 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
     const [formData, setFormData] = useState<DrugFormData>(defaultFormData);
     const [isLoading, setIsLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [activeIngredients, setActiveIngredients] = useState<ActiveIngredient[]>([]);
+    const [dosageUnits, setDosageUnits] = useState<DosageUnit[]>([]);
+    const [loadingIngredients, setLoadingIngredients] = useState(false);
+    const [loadingUnits, setLoadingUnits] = useState(false);
     const { t } = useTranslation()
     const {
-        activeIngredients,
-        dosageUnits,
-        ingredientsLoading,
-        unitsLoading,
-        fetchIngredients,
-        fetchUnits,
+        getActiveIngridients,
+        getDosageUnits,
         drugDetail,
         alertMsgs,
         editDrug,
         setDrugDetail,
-        setAlertMsgs
+        setAlertMessages
     } = useMeds();
-    
     useEffect(() => {
         if (isOpen && drugDetail) {
             const ingredient = activeIngredients.find((elm) =>
@@ -92,8 +91,25 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
 
     useEffect(() => {
         if (!isOpen) return;
-        fetchIngredients();
-        fetchUnits();
+        const fetchData = async () => {
+            setLoadingIngredients(true);
+            setLoadingUnits(true);
+            try {
+                const [ingredientsRes, unitsRes] = await Promise.all([
+                    getActiveIngridients(),
+                    getDosageUnits(),
+                ]);
+                setActiveIngredients(ingredientsRes.results || []);
+                setDosageUnits(unitsRes.results || []);
+            } catch (e) {
+                console.error('Error fetching data:', e);
+            } finally {
+                setLoadingIngredients(false);
+                setLoadingUnits(false);
+            }
+        };
+
+        fetchData();
     }, [isOpen]);
 
     const handleInputChange = useCallback(
@@ -127,8 +143,9 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
         setFormData(defaultFormData);
         setSubmitted(false);
         onClose();
-        setAlertMsgs({})
+        setAlertMessages({})
     };
+    console.log(drugDetail, formData)
     const i18nMedDirectory = (key: string): string =>
         t(`med-directory.${key}`);
     if (!isOpen) return null;
@@ -187,10 +204,10 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
                                     label: ingredient.name_en,
                                     name: ingredient.name_en
                                 }))}
-                                error={alertMsgs['active_ingredient']?.[0] || ''}
+                                error={alertMsgs['active_ingredient'] ? alertMsgs['active_ingredient'][0] : ''}
                                 required
                                 important
-                                disabled={ingredientsLoading}
+                                disabled={loadingIngredients}
                                 noResultsText={i18nMedDirectory('no-ingridients')}
                             />
                         </div>
@@ -211,7 +228,7 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
                                     label={i18nMedDirectory('concentration')}
                                     important
                                     required
-                                    className="max-w-[250px]"
+                                    className="w-[250px]"
                                     value={formData.concentration}
                                     onChange={(e) => handleInputChange('concentration', e.target.value)}
                                     placeholder="0.0000"
@@ -227,13 +244,13 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
                                         label: u.name_ru,
                                         name: u.name_ru,
                                     }))}
-                                    className="max-w-[250px]"
+                                    className="w-[250px]"
                                     value={formData.concentration_unit}
                                     onChange={(value: any) => handleInputChange('concentration_unit', value)}
                                     searchable
-                                    disabled={unitsLoading}
+                                    disabled={loadingUnits}
                                     noResultsText={i18nMedDirectory('no-units')}
-                                    error={alertMsgs['concentration_unit']?.[0] || ''}
+                                    error={alertMsgs['concentration_unit'] ? alertMsgs['concentration_unit'][0] : ''}
 
                                 />
                             </div>
@@ -246,7 +263,7 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
                                     label={i18nMedDirectory('vial-dose')}
                                     important
                                     required
-                                    className="max-w-[250px]"
+                                    className="w-[250px]"
                                     value={formData.vial_dose}
                                     onChange={(e) => handleInputChange('vial_dose', e.target.value)}
                                     placeholder="0.0000"
@@ -262,13 +279,13 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
                                         label: u.name_ru,
                                         name: u.name_ru,
                                     }))}
-                                    className="max-w-[250px]"
+                                    className="w-[250px]"
                                     value={formData.vial_unit}
                                     onChange={(value: any) => handleInputChange('vial_unit', value)}
                                     searchable
-                                    disabled={unitsLoading}
+                                    disabled={loadingUnits}
                                     noResultsText={i18nMedDirectory('no-units')}
-                                    error={alertMsgs['vial_unit']?.[0] || ''}
+                                    error={alertMsgs['vial_unit'] ? alertMsgs['vial_unit'][0] : ''}
                                 />
                             </div>
                         </div>
@@ -281,7 +298,7 @@ const UpdateDrugModal: React.FC<UpdateDrugModalProps> = ({
                                 value={formData.density}
                                 onChange={(e) => handleInputChange('density', e.target.value)}
                                 placeholder="0.0000"
-                                error={alertMsgs['density']?.[0] || ''}
+                                error={alertMsgs['vial_unit'] ? alertMsgs['vial_unit'][0] : ''}
 
                             />
                         </div>

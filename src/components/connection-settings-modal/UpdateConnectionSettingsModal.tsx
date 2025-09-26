@@ -4,8 +4,7 @@ import Button from '../shared/ui/Button/baseBtn';
 import Input from '../shared/ui/input/Input';
 import { IconMaterial } from '../shared/iconMaterial/IconMaterial';
 import SelectInput from '../shared/ui/input/SelectInput';
-import { TConnectionDetails } from '../../context/DeviceProvider';
-import { useDevices } from '../../hooks/useDevices';
+import { TConnectionDetails, useDevices } from '../../context/DeviceProvider';
 import { useTranslation } from 'react-i18next';
 import { apiTestConnection } from '../../api/devices/devices';
 
@@ -23,10 +22,10 @@ const UpdateConnectionSettingsModal: React.FC<UpdateConnectionsSettingsModalProp
         t(`device-directory.connection.${key}`);
     const {
         selectedDevice,
-        getConnectionSettings,
+        getDeviceConnection,
         connectionDetails,
         alertMsgs,
-        updateConnectionSettings,
+        updateConnectionSettins,
     } = useDevices()
     const [formData, setFormData] = useState({} as TConnectionDetails);
     const [isLoading, setIsLoading] = useState(false);
@@ -51,11 +50,9 @@ const UpdateConnectionSettingsModal: React.FC<UpdateConnectionsSettingsModalProp
 
     const handleSave = async () => {
         if (selectedDevice?.id) {
-            try {
-                await updateConnectionSettings(selectedDevice.id, formData);
-                onClose();
-            } catch (error) {
-                // Error handling is done in the hook
+            const response = await updateConnectionSettins(selectedDevice?.id, formData)
+            if (response) {
+                onClose()
             }
         }
 
@@ -63,10 +60,9 @@ const UpdateConnectionSettingsModal: React.FC<UpdateConnectionsSettingsModalProp
 
     useEffect(() => {
         if (selectedDevice?.id) {
-            getConnectionSettings(selectedDevice.id)
+            getDeviceConnection(selectedDevice.id)
         }
     }, [selectedDevice?.id])
-    
     useEffect(() => {
         if (connectionDetails) {
             setFormData(connectionDetails)

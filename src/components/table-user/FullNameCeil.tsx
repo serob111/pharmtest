@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { ProfileFoto } from "../shared/ui/ProfilePhoto";
 import { TooltipCell } from "../table/TooltipCell";
-import { TUser } from "../../types/userTypes";
+import { TUser } from "../../context/UsersProvider";
 
 
 

@@ -4,11 +4,9 @@ import { useTranslation } from 'react-i18next';
 import Input from '../../components/shared/ui/input/Input';
 import useDebounce from '../../lib/Debounce';
 import { useNavigate } from 'react-router';
-import { TOrder, TOrdersDashboard } from '../../context/OrdersProvider';
-import { useOrders } from '../../hooks/useOrders';
+import { TOrder, TOrdersDashboard, useOrders } from '../../context/OrdersProvider';
 import { TableOrder } from '../../components/table-orders/TableOrders';
 import DashboardCard from '../../components/card/DashboardCard';
-import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
 
 
 export default function Orders() {
@@ -16,20 +14,18 @@ export default function Orders() {
         limit,
         offset,
         ordersList,
-        ordersLoading,
-        dashboardLoading,
-        dashboard,
+        getOrderList,
         setLimit,
         setSelectedOrder,
         setOffset,
-        updateFilters,
-        refetchDashboard
+        getOrderDashboard
     } = useOrders();
 
 
     const navigate = useNavigate()
     const [searchValue, setSearchValue] = useState('')
     const [activeTab, setActiveTab] = useState('');
+    const [dashboard, setDashboard] = useState({} as TOrdersDashboard)
     const { t } = useTranslation()
     const i18nOrderDirectory = (key: string): string =>
         t(`orders-directory.${key}`);
@@ -55,15 +51,23 @@ export default function Orders() {
 
     const handleFilter = (id: string) => {
         setActiveTab(id)
-        updateFilters({ status: id })
+        getOrderList({ status: id })
     }
 
     useEffect(() => {
-        refetchDashboard()
+        const fetch = async () => {
+            const response = await getOrderDashboard()
+            setDashboard(response)
+        }
+        fetch()
     }, [])
 
     useEffect(() => {
-        updateFilters({ search: debouncedSearch || undefined });
+        if (debouncedSearch) {
+            getOrderList({ search: debouncedSearch });
+        } else {
+            getOrderList()
+        }
     }, [debouncedSearch, limit, offset]);
 
     return (
@@ -74,12 +78,7 @@ export default function Orders() {
             <div className="flex-1 flex relative overflow-hidden">
                 <div className="flex flex-col transition-all duration-500 ease-in-out overflow-hidden">
                     <div className="flex-shrink-0 p-4 bg-white border-b">
-                        {dashboardLoading ? (
-                            <div className="flex justify-center mb-4">
-                                <LoadingSpinner text="Loading dashboard..." />
-                            </div>
-                        ) : (
-                            <div className='flex justify-around mb-4'>
+                        <div className='flex justify-around mb-4'>
                             <DashboardCard
                                 title={i18nOrderDirectory('all-orders')}
                                 count={dashboard?.all_orders_count}
@@ -101,7 +100,6 @@ export default function Orders() {
                                 icon='cancel'
                             />
                         </div>
-                        )}
                         <div className="flex justify-between items-center">
                             <div className="h-auto ">
                                 {tabs.map((tab) => (
@@ -133,15 +131,8 @@ export default function Orders() {
                             </div>
                         </div>
                     </div>
-                    
-                    {ordersLoading && (
-                        <div className="flex-1 flex items-center justify-center">
-                            <LoadingSpinner size="lg" text="Loading orders..." />
-                        </div>
-                    )}
-                    
                     <div className="flex-1 px-4  overflow-auto">
-                        {!ordersLoading && <TableOrder
+                        <TableOrder
                             offset={offset}
                             setOffset={setOffset}
                             handleRowClick={handleRowClick}
@@ -149,7 +140,7 @@ export default function Orders() {
                             ordersList={ordersList}
                             limit={limit}
                             filterNotFound={false}
-                        />}
+                        />
                     </div>
                 </div>
             </div>

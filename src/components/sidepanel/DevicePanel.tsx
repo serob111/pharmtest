@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { IconMaterial } from '../shared/iconMaterial/IconMaterial';
-import { useDevices } from '../../hooks/useDevices';
+import { useDevices } from '../../context/DeviceProvider';
 import { TabPanel } from '../tab-panel/TabPanel';
 import Modal from '../modal/Modal';
 import Button from '../shared/ui/Button/baseBtn';
 import { useTranslation } from 'react-i18next';
 import UpdateConnectionSettingsModal from '../connection-settings-modal/UpdateConnectionSettingsModal';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 export interface DevicePanelProps {
   isOpen: boolean;
@@ -30,8 +30,7 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
   } = useDevices()
 
   useEffect(() => {
-    if (selectedDevice?.id) {
-      console.log('Fetching device detail for:', selectedDevice.id);
+    if (selectedDevice) {
       getDeviceDetail(selectedDevice.id)
     }
   }, [selectedDevice?.id])
@@ -43,8 +42,8 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
     setIsOpenDeleteModal(true)
   }
   const handleSave = () => {
-    if (selectedDevice?.id) {
-      deactivateDevice(selectedDevice.id)
+    if (deviceDetail?.id) {
+      deactivateDevice(deviceDetail.id)
       setIsOpenDeleteModal(false)
     }
   }
@@ -59,11 +58,6 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
 
   const i18nDeviceDirectory = (key: string): string =>
     t(`device-directory.${key}`);
-
-  // Don't render if no device is selected
-  if (!selectedDevice) {
-    return null;
-  }
 
   return (
     <>
@@ -89,7 +83,6 @@ const DevicePanel: React.FC<DevicePanelProps> = ({
               {selectedDevice?.name}
             </h2>
             <p className="text-sm text-gray-600 font-montserrat">
-              {selectedDevice?.department}
             </p>
           </div>
         </div>

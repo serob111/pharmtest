@@ -1,6 +1,8 @@
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from "react-router";
 import { useAuth } from "../context/AuthProvider";
 import { DashboardProvider, useDashboard } from "../context/DashboardProvider";
+import { UsersProvider, useUsers } from "../context/UsersProvider";
+import { MedsProvider, useMeds } from "../context/MedDirProvider";
 
 import AuthLayout from "../layouts/AuthLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
@@ -14,13 +16,15 @@ import AccountSettings from "../pages/accountsettings/AccountSettings";
 
 import Spinner from "../components/shared/ui/Spinner";
 import Devices from "../pages/devices/Devices";
+import { DeviceProvider } from "../context/DeviceProvider";
 import CreateDevice from "../pages/devices/create-device/CreateDevice";
 import EditDevice from "../pages/devices/edit-device/EditDevice";
+import { PrescriptionProvider } from "../context/PrescriptionProvider";
 import Prescriptions from "../pages/prescriptions/Prescriptions";
 import PrescriptionDetail from "../pages/prescriptions/PrescriptionDetail";
+import { OrderProvider } from "../context/OrdersProvider";
 import Orders from "../pages/orders/Orders";
 import OrderDetail from "../pages/orders/OrderDetail";
-import { useUsers } from "../hooks/useUsers";
 
 const PrivateRoutesWrapper = () => {
     return (
@@ -31,10 +35,11 @@ const PrivateRoutesWrapper = () => {
 };
 
 const PrivateRoutesContent = () => {
+    const { loadingMed } = useMeds()
     const { loading } = useDashboard();
     return (
         <DashboardLayout>
-            {loading ? <Spinner /> : <Outlet />}
+            {loading || loadingMed ? <Spinner /> : <Outlet />}
         </DashboardLayout>
     );
 };
@@ -79,7 +84,10 @@ export const Routes = () => {
                     children: [
                         {
                             path: "users",
-                            element: <Outlet />,
+                            element:
+                                <UsersProvider>
+                                    <Outlet />
+                                </UsersProvider>,
                             children: [
                                 {
                                     index: true,
@@ -100,11 +108,17 @@ export const Routes = () => {
                         },
                         {
                             path: "medicationdirectory",
-                            element: <MedicationDirectory />
+                            element:
+                                <MedsProvider>
+                                    <MedicationDirectory />
+                                </MedsProvider>
                         },
                         {
                             path: "devices",
-                            element: <Outlet />,
+                            element:
+                                <DeviceProvider>
+                                    <Outlet />
+                                </DeviceProvider>,
                             children: [
                                 {
                                     index: true,
@@ -125,7 +139,10 @@ export const Routes = () => {
                         },
                         {
                             path: "prescriptions",
-                            element: <Outlet />,
+                            element:
+                                <PrescriptionProvider>
+                                    <Outlet />
+                                </PrescriptionProvider>,
                             children: [
                                 {
                                     index: true,
@@ -139,7 +156,10 @@ export const Routes = () => {
                         },
                         {
                             path: "orders",
-                            element: <Outlet />,
+                            element:
+                                <OrderProvider>
+                                    <Outlet />
+                                </OrderProvider>,
                             children: [
                                 {
                                     index: true,

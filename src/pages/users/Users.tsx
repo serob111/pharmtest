@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react';
 import Header from '../../components/header/Header';
 import { TableUsers } from '../../components/table-user/TableUser';
-import { TUser } from '../../context/UsersProvider';
-import { useUsers } from '../../hooks/useUsers';
-import LoadingSpinner from '../../components/shared/ui/LoadingSpinner';
+import { TUser, useUsers } from '../../context/UsersProvider';
+import { useDashboard } from '../../context/DashboardProvider';
 
 export default function Users() {
-  const { usersList, limit, setLimit, offset, setOffset, usersLoading } = useUsers();
+  const { usersList, limit, setLimit, offset, setOffset } = useUsers();
   const [sortConfig, setSortConfig] = useState<{
     field: keyof TUser | null;
     direction: 'asc' | 'desc';
@@ -54,13 +53,7 @@ export default function Users() {
         create={'/users/creating/new'} 
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        {usersLoading && (
-          <div className="flex-1 flex items-center justify-center">
-            <LoadingSpinner size="lg" text="Loading users..." />
-          </div>
-        )}
-        
-        {!usersLoading && <div className="flex-1 overflow-auto mt-5">
+        <div className="flex-1 overflow-auto mt-5">
           <TableUsers
             offset={offset}
             setOffset={setOffset}
@@ -69,7 +62,7 @@ export default function Users() {
             usersList={paginatedUsersList}
             limit={limit}
           />
-        </div>}
+        </div>
       </div>
     </div>
   );

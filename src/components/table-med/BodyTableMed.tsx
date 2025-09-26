@@ -2,7 +2,7 @@ import { type JSX } from "react";
 import { cn } from "../../lib/utils";
 import { TooltipCell } from "../table/TooltipCell";
 import { IconMaterial } from "../shared/iconMaterial/IconMaterial";
-import { TMed } from "../../types/medTypes";
+import { TMed, useMeds } from "../../context/MedDirProvider";
 import DropdownMenu from "../dropdown/DropDownMenu";
 
 
@@ -13,19 +13,20 @@ type BodyTableProps = {
   isPagination?: boolean;
   isLoadingSendInvitation: boolean;
   onEdit?: () => void;
-  selectedMed?: TMed | null;
 };
 
 export const BodyTableMeds = ({
   rows,
   handleRowClick,
-  onEdit,
-  selectedMed
+  onEdit
 }: BodyTableProps): JSX.Element => {
   const baseCellClassName = cn(
     "p-[12px] typo-body-small-medium-14 text-black text-sm text-primary-light",
     "align-middle min-w-0",
   );
+  const {
+    selectedMed
+  } = useMeds()
   return (
     <>
       {rows.map((med) => {
@@ -66,7 +67,7 @@ export const BodyTableMeds = ({
               <div className="flex justify-end items-center h-full w-full">
                 <DropdownMenu
                   onEdit={onEdit}
-                  onDetailView={() => handleRowClick(med)}
+                  onDetailView={()=>handleRowClick}
                 />
               </div>
             </td>

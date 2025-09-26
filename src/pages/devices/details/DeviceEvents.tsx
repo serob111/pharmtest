@@ -1,20 +1,20 @@
 import { useEffect } from "react";
-import { useDevices } from "../../../hooks/useDevices";
+import { useDevices } from "../../../context/DeviceProvider";
 import Button from "../../../components/shared/ui/Button/baseBtn";
 import { useTranslation } from "react-i18next";
 
 
 
 function DetailEvents() {
-    const { getDeviceEvents, selectedDevice, deviceEvents } = useDevices()
+    const { getDevciceLatestEvents, deviceDetail, deviceEvents } = useDevices()
     const { t } = useTranslation()
     const i18nDeviceDirectory = (key: string): string =>
         t(`device-directory.${key}`);
     useEffect(() => {
-        if (selectedDevice?.id) {
-            getDeviceEvents(selectedDevice.id)
+        if (deviceDetail?.id) {
+            getDevciceLatestEvents(deviceDetail.id)
         }
-    }, [selectedDevice?.id])
+    }, [deviceDetail?.id])
 
     return (
         <div className="w-full h-full p-4 bg-white  flex flex-col justify-between items-start gap-4 font-montserrat">
@@ -29,7 +29,7 @@ function DetailEvents() {
 
                         <div className="flex-1 max-w-3xl flex flex-col justify-start items-start gap-1">
                             <div className="w-full text-custom-gray text-xs font-medium leading-[18px] break-words">
-                                {item.timestamp ? String(item.timestamp) : 'Not Provided Yet'}
+                                {item.created_at ? String(item.created_at) : 'Not Provided Yet'}
                             </div>
 
                             <div className="w-full text-custom-dark text-sm font-normal leading-[22px] break-words">
