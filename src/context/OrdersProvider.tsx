@@ -6,6 +6,7 @@ import {
     useContext,
     useMemo,
     useState,
+    useCallback,
 } from 'react';
 import { TPrescriptionDetail } from './PrescriptionProvider';
 import { apiGetOrderDetail,  apiGetOrders,  apiGetOrdersDashboard, apiSendorder } from '../api/orders/orders';
@@ -13,6 +14,7 @@ import { AlertState } from '../components/alert/AlertsWrapper';
 import { useTranslation } from 'react-i18next';
 import { AlertType, AlertVariant } from '../components/alert/Alert';
 import { isErrorWithResponse } from '../lib/utils';
+import { useGlobalLoading } from './GlobalLoadingProvider';
 interface OrderListOptions {
     search?: string;
     status?: string
@@ -27,9 +29,10 @@ type TContext = {
     offset: number;
     ordersList: TOrdersList;
     orderDetail: TOrder | null,
+    loading: boolean;
     alertMsgs: AlertState | null;
     setAlertMessages: Dispatch<SetStateAction<AlertState | null>>;
-    getOrderDetail: (id: string) => void;
+    getOrderDetail: (id: string) => Promise<void>;
     sendOrder: (id: string, device?: string) => Promise<string | undefined>;
     getOrderDashboard: () => Promise<TOrdersDashboard>;
     getOrderList: (options?: {
@@ -124,13 +127,19 @@ export const OrderProvider = ({ children }: TProps) => {
     const [selectedOrder, setSelectedOrder] = useState<TOrder | null>(null);
     const [alertMsgs, setAlertMessages] = useState<AlertState | null>(null);
     const [orderDetail, setOrderDetail] = useState<TOrder | null>(null);
+    const [loading, setLoading] = useState(false);
+    
+    const { addLoadingSource, removeLoadingSource } = useGlobalLoading();
     const { t } = useTranslation()
 
-    const getOrderList = async ({
+    const getOrderList = useCallback(async ({
         search,
         status,
     }: OrderListOptions = {}) => {
+        setLoading(true);
+        addLoadingSource('order-list');
         try {
+            setAlertMessages(null);
             const response = await apiGetOrders({
                 limit,
                 offset,
@@ -142,37 +151,59 @@ export const OrderProvider = ({ children }: TProps) => {
                 setOrdersList(response.data);
             }
         } catch (error: any) {
-            setAlertMessages(error.response?.data || "Ошибка загрузки");
-            console.error(error);
+            setAlertMessages({
+                type: AlertType.Error,
+                messages: error.response?.data || "Ошибка загрузки",
+                variant: AlertVariant.Swimming
+            });
+        } finally {
+            setLoading(false);
+            removeLoadingSource('order-list');
         }
-    };
+    }, [limit, offset, addLoadingSource, removeLoadingSource]);
 
-    const getOrderDashboard = async () => {
+    const getOrderDashboard = useCallback(async () => {
+        addLoadingSource('order-dashboard');
         try {
+            setAlertMessages(null);
             const response = await apiGetOrdersDashboard();
             if (response.data) {
                 return response.data
             }
         } catch (error: any) {
-            setAlertMessages(error.response?.data || "Ошибка загрузки");
-            console.error(error);
+            setAlertMessages({
+                type: AlertType.Error,
+                messages: error.response?.data || "Ошибка загрузки",
+                variant: AlertVariant.Swimming
+            });
+        } finally {
+            removeLoadingSource('order-dashboard');
         }
-    };
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const getOrderDetail = async (id: string) => {
+    const getOrderDetail = useCallback(async (id: string) => {
+        addLoadingSource('order-detail');
         try {
+            setAlertMessages(null);
             const resposnse = await apiGetOrderDetail(id);
             if (resposnse.data) {
                 setOrderDetail(resposnse.data)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages({
+                type: AlertType.Error,
+                messages: error.response?.data || "Failed to load order detail",
+                variant: AlertVariant.Swimming
+            });
+        } finally {
+            removeLoadingSource('order-detail');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const sendOrder = async (id: string, device?: string) => {
+    const sendOrder = useCallback(async (id: string, device?: string) => {
+        addLoadingSource('order-send');
         try {
+            setAlertMessages(null);
             const response = await apiSendorder(id, device);
             setAlertMessages({
                 type: AlertType.Success,
@@ -194,8 +225,10 @@ export const OrderProvider = ({ children }: TProps) => {
             });
 
             return null;
+        } finally {
+            removeLoadingSource('order-send');
         }
-    };
+    }, [addLoadingSource, removeLoadingSource]);
 
 
     const contextValue = useMemo(() => ({
@@ -203,6 +236,7 @@ export const OrderProvider = ({ children }: TProps) => {
         selectedOrder,
         limit,
         offset,
+        loading,
         alertMsgs,
         orderDetail,
         setAlertMessages,
@@ -213,7 +247,19 @@ export const OrderProvider = ({ children }: TProps) => {
         setLimit,
         getOrderDashboard,
         setSelectedOrder,
-    }), [selectedOrder, orderDetail, alertMsgs, offset, limit, ordersList]);
+    }), [
+        ordersList,
+        selectedOrder,
+        limit,
+        offset,
+        loading,
+        alertMsgs,
+        orderDetail,
+        sendOrder,
+        getOrderDetail,
+        getOrderList,
+        getOrderDashboard,
+    ]);
 
 
     return (

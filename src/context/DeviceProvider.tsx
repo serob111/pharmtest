@@ -6,9 +6,11 @@ import {
     useContext,
     useMemo,
     useState,
+    useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiCreateDevice, apiDeactivateDevice, apiDeleteDevice, apiEditDevice, apiGetDeviceConnectionSettings, apiGetDeviceDetail, apiGetDeviceEvents, apiGetDeviceManufacturers, apiGetDeviceMessages, apiGetDeviceModels, apiGetDevices, apiPingDevice, apiUpdateConnection } from '../api/devices/devices';
+import { useGlobalLoading } from './GlobalLoadingProvider';
 interface DeviceListOptions {
     search?: string;
     manufacturers?: string[];
@@ -40,6 +42,7 @@ type TContext = {
     deviceModels: TDeviceModel[];
     deviceManufacturers: any;
     deviceDetail: TDevice | null,
+    loading: boolean;
     alertMsgs: Partial<Record<string, string[] | any>>;
     updateConnectionSettins: (id: number, params: TConnectionDetails) => Promise<TConnectionDetails | null>;
     getDeviceDetail: (id: number) => void;
@@ -152,44 +155,57 @@ export const DeviceProvider = ({ children }: TProps) => {
     const [limit, setLimit] = useState(10);
     const [offset, setOffset] = useState(0);
     const [selectedDevice, setSelectedDevice] = useState<TDevice | null>(null);
-    const [alertMsgs, setAlertMessages] = useState({});
-    const [deviceModels, setDeviceModels] = useState([])
-    const [deviceManufacturers, setDeviceManufacturers] = useState([])
+    const [loading, setLoading] = useState(false);
+    const [alertMsgs, setAlertMessages] = useState<Partial<Record<string, string[] | any>>>({});
+    const [deviceModels, setDeviceModels] = useState<TDeviceModel[]>([])
+    const [deviceManufacturers, setDeviceManufacturers] = useState<any[]>([])
     const [deviceDetail, setDeviceDetail] = useState<TDevice | null>(null);
     const [deviceEvents, setDeviceEvents] = useState<TDeviceEvents[]>([] as TDeviceEvents[])
     const [deviceMessages, setDeviceMessages] = useState<TDeviceMessages[]>([] as TDeviceMessages[])
     const [connectionDetails, setConnectionDetails] = useState({} as TConnectionDetails)
+    
+    const { addLoadingSource, removeLoadingSource } = useGlobalLoading();
     const { t } = useTranslation()
-    async function CreateDevice(data: TCreateDeviceProp) {
+    const CreateDevice = useCallback(async (data: TCreateDeviceProp) => {
+        addLoadingSource('device-create');
         try {
+            setAlertMessages({});
             const response = await apiCreateDevice(data);
             if (response.data) {
                 window.location.assign('/devices')
             }
         } catch (error: any) {
-            console.log(error)
-            setAlertMessages(error.response.data);
+            setAlertMessages(error.response?.data || { error: ['Failed to create device'] });
+        } finally {
+            removeLoadingSource('device-create');
         }
-    }
-    async function EditDevice(id: number, data: TCreateDeviceProp) {
+    }, [addLoadingSource, removeLoadingSource]);
+
+    const EditDevice = useCallback(async (id: number, data: TCreateDeviceProp) => {
+        addLoadingSource('device-edit');
         try {
+            setAlertMessages({});
             const response = await apiEditDevice(id, data);
             if (response.data) {
                 window.location.assign('/devices')
             }
         } catch (error: any) {
-            console.log(error)
-            setAlertMessages(error.response.data);
+            setAlertMessages(error.response?.data || { error: ['Failed to edit device'] });
+        } finally {
+            removeLoadingSource('device-edit');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const getDeviceList = async ({
+    const getDeviceList = useCallback(async ({
         search,
         manufacturers,
         models,
         statuses,
     }: DeviceListOptions = {}) => {
+        setLoading(true);
+        addLoadingSource('device-list');
         try {
+            setAlertMessages({});
             const response = await apiGetDevices({
                 limit,
                 offset,
@@ -203,133 +219,163 @@ export const DeviceProvider = ({ children }: TProps) => {
                 setDevicesList(response.data);
             }
         } catch (error: any) {
-            setAlertMessages(error.response?.data || t('error'));
-            console.error(error);
+            setAlertMessages(error.response?.data || { error: [t('error')] });
+        } finally {
+            setLoading(false);
+            removeLoadingSource('device-list');
         }
-    };
+    }, [limit, offset, addLoadingSource, removeLoadingSource, t]);
 
-    const getDeviceModels = async () => {
+    const getDeviceModels = useCallback(async () => {
+        addLoadingSource('device-models');
         try {
+            setAlertMessages({});
             const resposnse = await apiGetDeviceModels();
             if (resposnse.data) {
                 setDeviceModels(resposnse.data.results)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load device models'] })
+        } finally {
+            removeLoadingSource('device-models');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const getDeviceManufacturers = async () => {
+    const getDeviceManufacturers = useCallback(async () => {
+        addLoadingSource('device-manufacturers');
         try {
+            setAlertMessages({});
             const resposnse = await apiGetDeviceManufacturers();
             if (resposnse.data) {
                 setDeviceManufacturers(resposnse.data.results)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load device manufacturers'] })
+        } finally {
+            removeLoadingSource('device-manufacturers');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const getDeviceDetail = async (id: number) => {
+    const getDeviceDetail = useCallback(async (id: number) => {
+        addLoadingSource('device-detail');
         try {
+            setAlertMessages({});
             const resposnse = await apiGetDeviceDetail(id);
             if (resposnse.data) {
                 setDeviceDetail(resposnse.data)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load device detail'] })
+        } finally {
+            removeLoadingSource('device-detail');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const pingDevice = async (id: number) => {
+    const pingDevice = useCallback(async (id: number) => {
+        addLoadingSource('device-ping');
         try {
+            setAlertMessages({});
             const resposnse = await apiPingDevice(id);
-            if (resposnse.data) {
-                console.log(resposnse.data)
-            }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to ping device'] })
+        } finally {
+            removeLoadingSource('device-ping');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const deactivateDevice = async (id: number) => {
+    const deactivateDevice = useCallback(async (id: number) => {
+        addLoadingSource('device-deactivate');
         try {
+            setAlertMessages({});
             await apiDeactivateDevice(id);
-
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to deactivate device'] })
+        } finally {
+            removeLoadingSource('device-deactivate');
         }
-    }
-    const deleteteDevice = async (id: number) => {
+    }, [addLoadingSource, removeLoadingSource]);
+
+    const deleteteDevice = useCallback(async (id: number) => {
+        addLoadingSource('device-delete');
         try {
+            setAlertMessages({});
             await apiDeleteDevice(id);
-
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to delete device'] })
+        } finally {
+            removeLoadingSource('device-delete');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const getDevciceLatestEvents = async (id: number) => {
+    const getDevciceLatestEvents = useCallback(async (id: number) => {
+        addLoadingSource('device-events');
         try {
+            setAlertMessages({});
             const response = await apiGetDeviceEvents(id);
             if (response.data) {
                 setDeviceEvents(response.data)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load device events'] })
+        } finally {
+            removeLoadingSource('device-events');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const getDevciceLatestMessages = async (id: number) => {
-
+    const getDevciceLatestMessages = useCallback(async (id: number) => {
+        addLoadingSource('device-messages');
         try {
+            setAlertMessages({});
             const response = await apiGetDeviceMessages(id);
             if (response.data) {
                 setDeviceMessages(response.data)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load device messages'] })
+        } finally {
+            removeLoadingSource('device-messages');
         }
-    }
-    const getDeviceConnection = async (id: number) => {
+    }, [addLoadingSource, removeLoadingSource]);
+
+    const getDeviceConnection = useCallback(async (id: number) => {
+        addLoadingSource('device-connection');
         try {
+            setAlertMessages({});
             const response = await apiGetDeviceConnectionSettings(id);
             if (response.data) {
                 setConnectionDetails(response.data)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load device connection'] })
+        } finally {
+            removeLoadingSource('device-connection');
         }
-    }
-    const updateConnectionSettins = async (id: number, params: TConnectionDetails) => {
+    }, [addLoadingSource, removeLoadingSource]);
+
+    const updateConnectionSettins = useCallback(async (id: number, params: TConnectionDetails) => {
+        addLoadingSource('device-connection-update');
         try {
+            setAlertMessages({});
             const response = await apiUpdateConnection(id, params);
             if (response.data) {
                 setConnectionDetails(response.data)
-                setAlertMessages({})
                 return response.data
             }
+            return null;
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to update connection'] })
             return null
+        } finally {
+            removeLoadingSource('device-connection-update');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
     const contextValue = useMemo(() => ({
         devicesList,
         selectedDevice,
         limit,
         offset,
+        loading,
         alertMsgs,
         deviceModels,
         deviceManufacturers,
@@ -353,7 +399,33 @@ export const DeviceProvider = ({ children }: TProps) => {
         setOffset,
         setLimit,
         setSelectedDevice,
-    }), [selectedDevice, deviceEvents, deviceMessages, deviceDetail, alertMsgs, offset, limit, deviceManufacturers, deviceModels, devicesList]);
+    }), [
+        devicesList,
+        selectedDevice,
+        limit,
+        offset,
+        loading,
+        alertMsgs,
+        deviceModels,
+        deviceManufacturers,
+        deviceDetail,
+        deviceEvents,
+        deviceMessages,
+        connectionDetails,
+        deleteteDevice,
+        EditDevice,
+        updateConnectionSettins,
+        getDeviceConnection,
+        CreateDevice,
+        getDeviceDetail,
+        getDevciceLatestEvents,
+        getDevciceLatestMessages,
+        pingDevice,
+        deactivateDevice,
+        getDeviceList,
+        getDeviceManufacturers,
+        getDeviceModels,
+    ]);
 
 
     return (

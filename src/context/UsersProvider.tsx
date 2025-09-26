@@ -7,10 +7,12 @@ import {
     useEffect,
     useMemo,
     useState,
+    useCallback,
 } from 'react';
 import { get, post } from '../service/axios';
 import { useDashboard } from './DashboardProvider';
 import { apiGetUserRoles, apiUpdateUserName, apiUpdateUserPhone, apiUpdateUserRole, apiUpdateUserStatus } from '../api/users/users';
+import { useGlobalLoading } from './GlobalLoadingProvider';
 
 type TProps = {
     children: ReactNode;
@@ -35,18 +37,20 @@ type TContext = {
     usersList: TUsersList,
     limit: number;
     offset: number;
+    loading: boolean;
     roles: TRole[];
     alertMsgs: Partial<Record<string, string[]>>;
     setUsersList: Dispatch<SetStateAction<{ count: number; results: TUser[] }>>;
     setSelectedProfile: Dispatch<SetStateAction<TUser>>;
-    getRoles: () => void;
+    getRoles: () => Promise<void>;
     setOffset: Dispatch<SetStateAction<number>>;
     setLimit: Dispatch<SetStateAction<number>>;
-    CreateUser: (params: TCreateUserProp) => void;
-    updateUserFullName: ({ id, firstName, lastName }: { id: number, firstName: string, lastName: string }) => void;
-    updateUserPhoneNumber: ({ id, phone }: { id: number, phone: string }) => void;
-    updateUserStatus: ({ id, status }: { id: number, status: boolean }) => void;
-    updateUserRole: ({ id, role }: { id: number, role: string | number }) => void;
+    CreateUser: (params: TCreateUserProp) => Promise<void>;
+    updateUserFullName: ({ id, firstName, lastName }: { id: number, firstName: string, lastName: string }) => Promise<void>;
+    updateUserPhoneNumber: ({ id, phone }: { id: number, phone: string }) => Promise<void>;
+    updateUserStatus: ({ id, status }: { id: number, status: boolean }) => Promise<void>;
+    updateUserRole: ({ id, role }: { id: number, role: string | number }) => Promise<void>;
+    fetchUsers: () => Promise<void>;
 };
 export type TUser = {
     profile_photo_thumbnail?: string;
@@ -77,101 +81,133 @@ export const UsersProvider = ({ children }: TProps) => {
     });
     const [limit, setLimit] = useState(10);
     const [offset, setOffset] = useState(0);
-    const [alertMsgs, setAlertMessages] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [alertMsgs, setAlertMessages] = useState<Partial<Record<string, string[]>>>({});
     const [selectedProfile, setSelectedProfile] = useState<TUser>({} as TUser)
-    const [roles, setRoles] = useState([])
-    const { loading, setLoading } = useDashboard()
+    const [roles, setRoles] = useState<TRole[]>([])
+    
+    const { addLoadingSource, removeLoadingSource } = useGlobalLoading();
     const { setCloseUpdateModal } = useDashboard()
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                const response = await get<TUsersList>('/users', { params: { limit, offset } });
-                setUsersList({
-                    count: response.data.count,
-                    results: response.data.results,
-                });
-            } catch (error) {
-                console.error(error);
-            }
-        };
-        fetchUsers();
-    }, [limit, offset]);
-
-    async function CreateUser(data: TCreateUserProp) {
+    const fetchUsers = useCallback(async () => {
+        setLoading(true);
+        addLoadingSource('users-list');
         try {
+            setAlertMessages({});
+            const response = await get<TUsersList>('/users', { params: { limit, offset } });
+            setUsersList({
+                count: response.data.count,
+                results: response.data.results,
+            });
+        } catch (error: any) {
+            setAlertMessages(error.response?.data || { error: ['Failed to load users'] });
+        } finally {
+            setLoading(false);
+            removeLoadingSource('users-list');
+        }
+    }, [limit, offset, addLoadingSource, removeLoadingSource]);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
+    const CreateUser = useCallback(async (data: TCreateUserProp) => {
+        addLoadingSource('user-create');
+        try {
+            setAlertMessages({});
             const response = await post('/users/', data);
             if (response.data) {
                 window.location.assign('/users')
             }
-
         } catch (error: any) {
-            console.log(error)
-            if (error.response?.data) {
-                setAlertMessages(error.response.data);
-            }
+            setAlertMessages(error.response?.data || { error: ['Failed to create user'] });
+        } finally {
+            removeLoadingSource('user-create');
         }
-    }
-    const updateUserFullName = async ({ id, firstName, lastName }: { id: number, firstName: string, lastName: string }) => {
-        setLoading(true)
+    }, [addLoadingSource, removeLoadingSource]);
+
+    const updateUserFullName = useCallback(async ({ id, firstName, lastName }: { id: number, firstName: string, lastName: string }) => {
+        addLoadingSource('user-update-name');
         try {
+            setAlertMessages({});
             const response = await apiUpdateUserName({ id, firstName, lastName })
             if (response.data) {
                 setSelectedProfile(response.data)
                 setCloseUpdateModal(true)
-                setLoading(false)
             }
-
         } catch (error: any) {
-            setAlertMessages(error.response.data)
+            setAlertMessages(error.response?.data || { error: ['Failed to update user name'] })
+        } finally {
+            removeLoadingSource('user-update-name');
         }
-    }
-    const updateUserPhoneNumber = async ({ id, phone }: { id: number, phone: string }) => {
-        setLoading(true)
+    }, [addLoadingSource, removeLoadingSource, setCloseUpdateModal]);
+
+    const updateUserPhoneNumber = useCallback(async ({ id, phone }: { id: number, phone: string }) => {
+        addLoadingSource('user-update-phone');
         try {
+            setAlertMessages({});
             const response = await apiUpdateUserPhone(id, phone)
+            if (response.data) {
+                setSelectedProfile(response.data)
+                setCloseUpdateModal(true)
+            }
+        } catch (error: any) {
+            setAlertMessages(error.response?.data || { error: ['Failed to update user phone'] })
+        } finally {
+            removeLoadingSource('user-update-phone');
+        }
+    }, [addLoadingSource, removeLoadingSource, setCloseUpdateModal]);
 
-            setSelectedProfile(response.data)
-            setCloseUpdateModal(true)
-            setLoading(false)
-        } catch (error: any) {
-            setAlertMessages(error.response.data)
-        }
-    }
-    const updateUserStatus = async ({ id }: { id: number }) => {
-        setLoading(true)
+    const updateUserStatus = useCallback(async ({ id }: { id: number, status: boolean }) => {
+        addLoadingSource('user-update-status');
         try {
+            setAlertMessages({});
             const response = await apiUpdateUserStatus(id)
-            setSelectedProfile(response.data)
-            setLoading(false)
+            if (response.data) {
+                setSelectedProfile(response.data)
+            }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
+            setAlertMessages(error.response?.data || { error: ['Failed to update user status'] })
+        } finally {
+            removeLoadingSource('user-update-status');
         }
-    }
-    const updateUserRole = async ({ id, role }: { id: number, role: string | number }) => {
-        setLoading(true)
+    }, [addLoadingSource, removeLoadingSource]);
+
+    const updateUserRole = useCallback(async ({ id, role }: { id: number, role: string | number }) => {
+        addLoadingSource('user-update-role');
         try {
+            setAlertMessages({});
             const response = await apiUpdateUserRole(id, role)
-            setSelectedProfile(response.data)
-            setLoading(false)
-            setCloseUpdateModal(true)
+            if (response.data) {
+                setSelectedProfile(response.data)
+                setCloseUpdateModal(true)
+            }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
+            setAlertMessages(error.response?.data || { error: ['Failed to update user role'] })
+        } finally {
+            removeLoadingSource('user-update-role');
         }
-    }
-    const getRoles = async () => {
+    }, [addLoadingSource, removeLoadingSource, setCloseUpdateModal]);
+
+    const getRoles = useCallback(async () => {
+        addLoadingSource('user-roles');
         try {
+            setAlertMessages({});
             const response = await apiGetUserRoles()
-            setRoles(response.data.results)
+            if (response.data?.results) {
+                setRoles(response.data.results)
+            }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
+            setAlertMessages(error.response?.data || { error: ['Failed to load user roles'] })
+        } finally {
+            removeLoadingSource('user-roles');
         }
-    };
+    }, [addLoadingSource, removeLoadingSource]);
 
     const contextValue = useMemo(() => ({
         usersList,
         limit,
         roles,
         offset,
+        loading,
         selectedProfile,
         alertMsgs,
         setOffset,
@@ -183,8 +219,24 @@ export const UsersProvider = ({ children }: TProps) => {
         updateUserStatus,
         updateUserPhoneNumber,
         setLimit,
-        CreateUser
-    }), [usersList, roles, selectedProfile, limit, loading, alertMsgs, offset,]);
+        CreateUser,
+        fetchUsers
+    }), [
+        usersList,
+        limit,
+        roles,
+        offset,
+        loading,
+        selectedProfile,
+        alertMsgs,
+        getRoles,
+        updateUserRole,
+        updateUserFullName,
+        updateUserStatus,
+        updateUserPhoneNumber,
+        CreateUser,
+        fetchUsers
+    ]);
 
     return (
         <UsersContext.Provider value={contextValue}>

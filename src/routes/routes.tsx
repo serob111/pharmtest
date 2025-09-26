@@ -35,11 +35,10 @@ const PrivateRoutesWrapper = () => {
 };
 
 const PrivateRoutesContent = () => {
-    const { loadingMed } = useMeds()
     const { loading } = useDashboard();
     return (
         <DashboardLayout>
-            {loading || loadingMed ? <Spinner /> : <Outlet />}
+            {loading ? <Spinner /> : <Outlet />}
         </DashboardLayout>
     );
 };

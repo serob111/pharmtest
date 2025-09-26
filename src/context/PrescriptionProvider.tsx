@@ -6,13 +6,12 @@ import {
     useContext,
     useMemo,
     useState,
+    useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiGetPrescriptionDetail, apiGetPrescriptions } from '../api/prescriptions/prescriptions';
+import { useGlobalLoading } from './GlobalLoadingProvider';
 interface PrescriptionListOptions {
-    search?: string;
-    manufacturers?: string[];
-    models?: string[];
     statuses?: string[];
 }
 type TProps = {
@@ -25,13 +24,11 @@ type TContext = {
     offset: number;
     prescriptionsList: TPrescriptionsList;
     prescriptionDetail: TPrescription | null,
+    loading: boolean;
     alertMsgs: Partial<Record<string, string[]>>;
-    getPrescriptionDetail: (id: string) => void;
+    getPrescriptionDetail: (id: string) => Promise<void>;
     getPrescriptionList: (options?: {
         search?: string;
-        manufacturers?: string[];
-        models?: string[];
-        statuses?: string[];
     }) => Promise<void>;
     setOffset: Dispatch<SetStateAction<number>>;
     setLimit: Dispatch<SetStateAction<number>>;
@@ -113,14 +110,20 @@ export const PrescriptionProvider = ({ children }: TProps) => {
     const [limit, setLimit] = useState(10);
     const [offset, setOffset] = useState(0);
     const [selectedPrescription, setSelectedPrescription] = useState<TPrescription | null>(null);
-    const [alertMsgs, setAlertMessages] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [alertMsgs, setAlertMessages] = useState<Partial<Record<string, string[]>>>({});
     const [prescriptionDetail, setPrescriptionDetail] = useState<TPrescription | null>(null);
+    
+    const { addLoadingSource, removeLoadingSource } = useGlobalLoading();
     const { t } = useTranslation()
 
-    const getPrescriptionList = async ({
+    const getPrescriptionList = useCallback(async ({
         search,
     }: PrescriptionListOptions = {}) => {
+        setLoading(true);
+        addLoadingSource('prescription-list');
         try {
+            setAlertMessages({});
             const response = await apiGetPrescriptions({
                 limit,
                 offset,
@@ -131,24 +134,29 @@ export const PrescriptionProvider = ({ children }: TProps) => {
                 setPrescriptionsList(response.data);
             }
         } catch (error: any) {
-            setAlertMessages(error.response?.data || t('error'));
-            console.error(error);
+            setAlertMessages(error.response?.data || { error: [t('error')] });
+        } finally {
+            setLoading(false);
+            removeLoadingSource('prescription-list');
         }
-    };
+    }, [limit, offset, addLoadingSource, removeLoadingSource, t]);
 
 
 
-    const getPrescriptionDetail = async (id: string) => {
+    const getPrescriptionDetail = useCallback(async (id: string) => {
+        addLoadingSource('prescription-detail');
         try {
+            setAlertMessages({});
             const resposnse = await apiGetPrescriptionDetail(id);
             if (resposnse.data) {
                 setPrescriptionDetail(resposnse.data)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load prescription detail'] })
+        } finally {
+            removeLoadingSource('prescription-detail');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
 
 
@@ -157,6 +165,7 @@ export const PrescriptionProvider = ({ children }: TProps) => {
         selectedPrescription,
         limit,
         offset,
+        loading,
         alertMsgs,
         prescriptionDetail,
         getPrescriptionDetail,
@@ -164,7 +173,17 @@ export const PrescriptionProvider = ({ children }: TProps) => {
         setOffset,
         setLimit,
         setSelectedPrescription,
-    }), [selectedPrescription, prescriptionDetail, alertMsgs, offset, limit, prescriptionsList]);
+    }), [
+        prescriptionsList,
+        selectedPrescription,
+        limit,
+        offset,
+        loading,
+        alertMsgs,
+        prescriptionDetail,
+        getPrescriptionDetail,
+        getPrescriptionList,
+    ]);
 
 
     return (

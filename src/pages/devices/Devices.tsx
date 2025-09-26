@@ -16,6 +16,7 @@ export default function Devices() {
         offset,
         devicesList,
         selectedDevice,
+        loading,
         getDeviceList,
         setLimit,
         setSelectedDevice,
@@ -85,12 +86,8 @@ export default function Devices() {
     }
 
     useEffect(() => {
-        if (debouncedSearch) {
-            getDeviceList({ search: debouncedSearch });
-        } else {
-            getDeviceList()
-        }
-    }, [debouncedSearch, limit, offset]);
+        getDeviceList({ search: debouncedSearch });
+    }, [getDeviceList, debouncedSearch]);
 
     return (
         <div className="h-screen flex flex-col overflow-hidden">
@@ -119,6 +116,7 @@ export default function Devices() {
                                         size="lg"
                                         clearable
                                         rightIcon="search"
+                                        disabled={loading}
                                     />
                                 </div>
                             </div>

@@ -6,9 +6,11 @@ import {
     useContext,
     useMemo,
     useState,
+    useCallback,
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiEditDrug, apiGetActiveIngredients, apiGetDosageUnits, apiGetDrugDetail, apiGetDrugs } from '../api/drugs/drugs';
+import { useGlobalLoading } from './GlobalLoadingProvider';
 
 type TProps = {
     children: ReactNode;
@@ -25,11 +27,11 @@ type TContext = {
     alertMsgs: Partial<Record<string, string[]>>;
     setDrugDetail: Dispatch<SetStateAction<TMed | null>>
     setAlertMessages: Dispatch<SetStateAction<Partial<Record<string, string[]>>>>;
-    getActiveIngridients: () => any;
-    getDosageUnits: () => any;
+    getActiveIngridients: () => Promise<any>;
+    getDosageUnits: () => Promise<any>;
     editDrug: (id: string, params: TKiroDetail) => Promise<TMed | null>;
-    getDrugList: (useInKiro?: boolean, search?: string) => void;
-    getDrugDetail: (id: string) => void;
+    getDrugList: (useInKiro?: boolean, search?: string) => Promise<void>;
+    getDrugDetail: (id: string) => Promise<void>;
     setOffset: Dispatch<SetStateAction<number>>;
     setLimit: Dispatch<SetStateAction<number>>;
     setIsPanelOpen: Dispatch<SetStateAction<boolean>>;
@@ -95,75 +97,91 @@ export const MedsProvider = ({ children }: TProps) => {
     const [offset, setOffset] = useState(0);
     const [selectedMed, setSelectedMed] = useState<TMed | null>(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [alertMsgs, setAlertMessages] = useState({});
+    const [alertMsgs, setAlertMessages] = useState<Partial<Record<string, string[]>>>({});
     const [drugDetail, setDrugDetail] = useState<TMed | null>(null);
     const [loadingMed, setLoadingMed] = useState(false)
+    
+    const { addLoadingSource, removeLoadingSource } = useGlobalLoading();
     const { t } = useTranslation()
 
-    const getDrugList = async (useInKiro?: boolean, search?: string) => {
+    const getDrugList = useCallback(async (useInKiro?: boolean, search?: string) => {
         setLoadingMed(true);
+        addLoadingSource('med-list');
         try {
+            setAlertMessages({});
             const response = await apiGetDrugs({ limit, offset, useInKiro, search });
             if (response.data) {
                 setMedsList(response.data);
             }
         } catch (error: any) {
-            setAlertMessages(error.response?.data || t('error'));
+            setAlertMessages(error.response?.data || { error: [t('error')] });
         } finally {
             setLoadingMed(false);
+            removeLoadingSource('med-list');
         }
-    };
+    }, [limit, offset, addLoadingSource, removeLoadingSource, t]);
 
-    const getDrugDetail = async (id: string) => {
+    const getDrugDetail = useCallback(async (id: string) => {
+        addLoadingSource('med-detail');
         try {
+            setAlertMessages({});
             const resposnse = await apiGetDrugDetail(id);
             if (resposnse.data) {
                 setDrugDetail(resposnse.data)
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load drug detail'] })
+        } finally {
+            removeLoadingSource('med-detail');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const getActiveIngridients = async () => {
+    const getActiveIngridients = useCallback(async () => {
+        addLoadingSource('med-ingredients');
         try {
+            setAlertMessages({});
             const resposnse = await apiGetActiveIngredients();
             if (resposnse.data) {
                 return resposnse.data
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load active ingredients'] })
+        } finally {
+            removeLoadingSource('med-ingredients');
         }
-    }
-    const getDosageUnits = async () => {
+    }, [addLoadingSource, removeLoadingSource]);
+
+    const getDosageUnits = useCallback(async () => {
+        addLoadingSource('med-dosage-units');
         try {
+            setAlertMessages({});
             const resposnse = await apiGetDosageUnits();
             if (resposnse.data) {
                 return resposnse.data
             }
         } catch (error: any) {
-            setAlertMessages(error.response.data)
-            console.log(error)
+            setAlertMessages(error.response?.data || { error: ['Failed to load dosage units'] })
+        } finally {
+            removeLoadingSource('med-dosage-units');
         }
-    }
+    }, [addLoadingSource, removeLoadingSource]);
 
-    const editDrug = async (id: string, params: TKiroDetail): Promise<TMed | null> => {
+    const editDrug = useCallback(async (id: string, params: TKiroDetail): Promise<TMed | null> => {
+        addLoadingSource('med-edit');
         try {
+            setAlertMessages({});
             const resposnse = await apiEditDrug(id, params);
             if (resposnse.data) {
-                setAlertMessages({})
                 return resposnse.data;
             }
             return null;
         } catch (error: any) {
-            console.log(error)
             setAlertMessages(error.response?.data || { error: ["Ошибка при сохранении"] });
             return null;
+        } finally {
+            removeLoadingSource('med-edit');
         }
-    };
-
+    }, [addLoadingSource, removeLoadingSource]);
 
 
     const contextValue = useMemo(() => ({
@@ -186,7 +204,21 @@ export const MedsProvider = ({ children }: TProps) => {
         setLimit,
         setSelectedMed,
         setIsPanelOpen
-    }), [selectedMed, alertMsgs, offset, limit, loadingMed, isPanelOpen, medsList, medsList.count, drugDetail]);
+    }), [
+        medsList,
+        selectedMed,
+        isPanelOpen,
+        limit,
+        offset,
+        drugDetail,
+        alertMsgs,
+        loadingMed,
+        editDrug,
+        getDosageUnits,
+        getActiveIngridients,
+        getDrugDetail,
+        getDrugList,
+    ]);
 
     return (
         <MedsContext.Provider value={contextValue}>

@@ -14,6 +14,7 @@ export default function Orders() {
         limit,
         offset,
         ordersList,
+        loading,
         getOrderList,
         setLimit,
         setSelectedOrder,
@@ -63,12 +64,8 @@ export default function Orders() {
     }, [])
 
     useEffect(() => {
-        if (debouncedSearch) {
-            getOrderList({ search: debouncedSearch });
-        } else {
-            getOrderList()
-        }
-    }, [debouncedSearch, limit, offset]);
+        getOrderList({ search: debouncedSearch, status: activeTab });
+    }, [getOrderList, debouncedSearch, activeTab]);
 
     return (
         <div className="relative h-screen flex flex-col overflow-hidden">
@@ -110,6 +107,7 @@ export default function Orders() {
                                             ? 'text-primeblue border-b-2 border-primeblue'
                                             : 'text-primary-light'
                                             }`}
+                                        disabled={loading}
                                     >
                                         {tab.label}
                                     </button>
@@ -126,6 +124,7 @@ export default function Orders() {
                                         size="lg"
                                         clearable
                                         rightIcon="search"
+                                        disabled={loading}
                                     />
                                 </div>
                             </div>

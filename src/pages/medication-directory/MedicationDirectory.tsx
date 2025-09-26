@@ -16,6 +16,7 @@ export default function MedicationDirectory() {
     offset,
     isPanelOpen,
     medsList,
+    loadingMed,
     getDrugList,
     setLimit,
     setIsPanelOpen,
@@ -86,12 +87,8 @@ export default function MedicationDirectory() {
   }
 
   useEffect(() => {
-    if (debouncedSearch) {
-      getDrugList(useInKiro, debouncedSearch);
-    } else {
-      getDrugList(useInKiro)
-    }
-  }, [debouncedSearch, useInKiro, limit, offset]);
+    getDrugList(useInKiro, debouncedSearch);
+  }, [getDrugList, useInKiro, debouncedSearch]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -114,6 +111,7 @@ export default function MedicationDirectory() {
                     size="lg"
                     clearable
                     rightIcon="search"
+                    disabled={loadingMed}
                   />
                 </div>
                 <Switch
@@ -121,6 +119,7 @@ export default function MedicationDirectory() {
                   onChange={toggleKiro}
                   label="Only with KIRO Data"
                   size="md"
+                  disabled={loadingMed}
                 />
               </div>
               <div className="text-black text-sm flex justify-center gap-2 items-center">

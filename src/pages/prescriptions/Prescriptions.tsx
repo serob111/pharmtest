@@ -15,6 +15,7 @@ export default function Prescriptions() {
         limit,
         offset,
         prescriptionsList,
+        loading,
         getPrescriptionList,
         setLimit,
         setSelectedPrescription,
@@ -87,12 +88,8 @@ export default function Prescriptions() {
     }
 
     useEffect(() => {
-        if (debouncedSearch) {
-            getPrescriptionList({ search: debouncedSearch });
-        } else {
-            getPrescriptionList()
-        }
-    }, [debouncedSearch, limit, offset]);
+        getPrescriptionList({ search: debouncedSearch });
+    }, [getPrescriptionList, debouncedSearch]);
 
     return (
         <div className="relative h-screen flex flex-col overflow-hidden">
@@ -118,6 +115,7 @@ export default function Prescriptions() {
                                         size="lg"
                                         clearable
                                         rightIcon="search"
+                                        disabled={loading}
                                     />
                                 </div>
                             </div>
